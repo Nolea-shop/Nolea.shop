@@ -1,0 +1,58 @@
+{
+  "entities": {
+    "recipe": {
+      "title": "Recipe",
+      "description": "A digital recipe bundle or standalone recipe.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "The name of the recipe." },
+        "description": { "type": "string", "description": "A short summary." },
+        "price": { "type": "number", "description": "Price in cents." },
+        "imageUrl": { "type": "string", "description": "URL to the recipe image." },
+        "category": { "type": "string", "description": "e.g., Vegan, Brunch, Pasta." },
+        "contentUrl": { "type": "string", "description": "The digital download link or internal content identifier." },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "description", "price", "imageUrl", "createdAt"]
+    },
+    "order": {
+      "title": "Order",
+      "description": "A customer purchase.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "items": { "type": "array", "items": { "type": "string" } },
+        "total": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "completed", "cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "stripeSessionId": { "type": "string" }
+      },
+      "required": ["userId", "items", "total", "status", "createdAt"]
+    },
+    "userProfile": {
+      "title": "User Profile",
+      "description": "Extended user data.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "purchasedRecipeIds": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["email", "role"]
+    }
+  },
+  "firestore": {
+    "recipes": {
+      "schema": "recipe",
+      "description": "Collection of available recipes for sale."
+    },
+    "orders": {
+      "schema": "order",
+      "description": "Sales history."
+    },
+    "users": {
+      "schema": "userProfile",
+      "description": "User specific data and permissions."
+    }
+  }
+}

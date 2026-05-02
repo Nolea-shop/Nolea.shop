@@ -1,0 +1,95 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+        request.auth.token.email == 'julianlegendstar@gmail.com'
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Validate Recipe
+    function isValidRecipe(data) {
+      return data.keys().hasAll(['title', 'description', 'price', 'imageUrl', 'createdAt']) &&
+             data.title is string && data.title.size() <= 200 &&
+             data.description is string && data.description.size() <= 2000 &&
+             data.price is number && data.price >= 0 &&
+             data.imageUrl is string &&
+             data.createdAt is timestamp;
+    }
+
+    // Validate Order
+    function isValidOrder(data) {
+      return data.keys().hasAll(['userId', 'items', 'total', 'status', 'createdAt']) &&
+             data.userId == request.auth.uid &&
+             data.items is list &&
+             data.total is number &&
+             data.status in ['pending', 'completed', 'cancelled'] &&
+             data.createdAt == request.time;
+    }
+
+    // Validate User Profile
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['email', 'role']) &&
+             data.email is string &&
+             data.role in ['user', 'admin'];
+    }
+
+    // Recipes: Anyone can read, only Admin can write
+    match /recipes/{recipeId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && isValidRecipe(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // Orders: Owner and Admin can read, Owner can create 'pending'
+    match /orders/{orderId} {
+      allow read: if isOwner(existing().userId) || isAdmin();
+      allow create: if isSignedIn() && isValidOrder(incoming()) && incoming().status == 'pending';
+      // Only admins or system (via webhook) should update status, but since rules don't distinguish system user, 
+      // we'll allow admin to update anything, or users to potentially update if they are owner but only specific fields.
+      // Actually, standard security is that users shouldn't be able to mark their own orders as 'completed'.
+      allow update: if isAdmin() || (isOwner(existing().userId) && incoming().diff(existing()).affectedKeys().hasOnly(['status']) && existing().status == 'pending' && incoming().status == 'cancelled');
+    }
+
+    // Users: Owner and Admin can read, Owner can create/update their own profile
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isValidUserProfile(incoming()) && (incoming().role == 'user' || request.auth.token.email == 'julianlegendstar@gmail.com');
+      allow update: if isOwner(userId) && isValidUserProfile(incoming()) && (
+        (incoming().role == existing().role) || // User can't change their own role normally
+        isAdmin()
+      );
+    }
+  }
+}
