@@ -44,3 +44,11 @@ export async function updateRecipe(id: string, recipe: Partial<Recipe>) {
     handleFirestoreError(error, OperationType.WRITE, `${RECIPES_COLLECTION}/${id}`);
   }
 }
+
+export async function toggleRecipeOnline(id: string, currentStatus: boolean) {
+  try {
+    return await updateDoc(doc(db, RECIPES_COLLECTION, id), { isOnline: !currentStatus });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, `${RECIPES_COLLECTION}/${id}`);
+  }
+}

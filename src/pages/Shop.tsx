@@ -18,9 +18,7 @@ export function Shop() {
     getAllRecipes().then(setRecipes).finally(() => setLoading(false));
   }, []);
 
-  const filteredRecipes = category === 'Alle'
-    ? recipes
-    : recipes.filter(r => r.category.toLowerCase().includes(category.toLowerCase()));
+  const filteredRecipes = recipes.filter(r => r.isOnline && (category === 'Alle' || r.category.toLowerCase().includes(category.toLowerCase())));
 
   // Sort recipes
   const sortedRecipes = [...filteredRecipes].sort((a, b) => {
@@ -157,7 +155,10 @@ export function Shop() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center py-16 md:py-24 bg-white rounded-2xl md:rounded-[2rem] border border-[#E5E2D9]"
           >
-            <div className="text-5xl mb-4">🔍</div>
+            <svg className="w-12 h-12 mx-auto mb-4 text-[#E5E2D9]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
             <h2 className="text-xl md:text-2xl font-serif italic text-[#2D2A26] mb-2">
               Keine Produkte gefunden
             </h2>

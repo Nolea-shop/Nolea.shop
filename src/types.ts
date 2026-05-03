@@ -7,6 +7,7 @@ export interface Recipe {
   category: string;
   contentUrl?: string; // only for owner/admin
   createdAt: any;
+  isOnline: boolean; // controls visibility in shop
 }
 
 export interface CartItem extends Recipe {
