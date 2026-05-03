@@ -96,8 +96,10 @@ export function Admin() {
       setNewRecipe({ title: '', description: '', price: 0, imageUrl: '', category: 'Lifestyle', contentUrl: '' });
       const r = await getAllRecipes();
       setRecipes(r);
-    } catch (error) {
-      toast.error('Fehler beim Speichern');
+    } catch (error: any) {
+      console.error('Save error details:', error);
+      const errorMessage = error?.message || String(error);
+      toast.error(`Fehler: ${errorMessage.substring(0, 100)}`);
     }
   };
 
