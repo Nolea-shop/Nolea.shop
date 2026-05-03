@@ -31,7 +31,7 @@ export function Admin() {
   const [passwordInput, setPasswordInput] = useState('');
   const [passwordAuth, setPasswordAuth] = useState(false);
   
-  const ADMIN_PASSWORD = '24211vjß051vj89058901jv51j1jj890v511111j8v598v5901890v51vßüa';
+  const ADMIN_PASSWORD = '24211vj051vj89058901jv51j1jj890v511111j8v598v5901890v51va';
 
   const isAdmin = user?.email === 'julianlegendstar@gmail.com' || passwordAuth;
 
