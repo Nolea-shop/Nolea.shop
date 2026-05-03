@@ -61,8 +61,8 @@ app.get('/api/admin/system-dump', (req, res) => {
   }
 
   res.json({
-    appName: "Herzstück",
-    version: "1.0.0",
+    appName: "Nolea",
+    version: "1.2.0",
     features: ["pdf_delivery", "stripe_payments", "resend_emails"],
     schemas: {
       recipe: ["id", "title", "description", "price", "imageUrl", "category", "contentUrl"],
@@ -103,15 +103,15 @@ app.post('/api/admin/simulate-order', async (req, res) => {
   if (resend && customerEmail) {
     try {
       await resend.emails.send({
-        from: 'Herzstück Test <onboarding@resend.dev>',
+        from: 'Nolea Test <onboarding@resend.dev>',
         to: customerEmail,
-        subject: '[TEST] Deine herzstück Rezepte sind da ✨',
+        subject: '[TEST] Deine Nolea Produkte sind da ✨',
         html: `
           <div style="font-family: serif; color: #2D2A26; max-width: 600px; margin: 0 auto; padding: 40px; border: 2px dashed #8A9A5B; border-radius: 20px; background-color: #FAF9F6;">
             <div style="background: #8A9A5B; color: white; padding: 5px 15px; border-radius: 5px; display: inline-block; font-family: sans-serif; font-size: 10px; font-weight: bold; margin-bottom: 20px;">SIMULATION MODE</div>
             <h1 style="font-style: italic;">Test-Zustellung erfolgreich!</h1>
             <p>Dies ist eine Simulation des automatisierten Email-Versands.</p>
-            <p><strong>Gekaufte Test-Rezepte:</strong> ${recipeTitles}</p>
+            <p><strong>Gekaufte Test-Produkte:</strong> ${recipeTitles}</p>
             <div style="text-align: center; margin: 40px 0;">
               <a href="${APP_URL}/success" style="background-color: #2D2A26; color: white; padding: 15px 30px; text-decoration: none; border-radius: 30px; font-weight: bold; font-family: sans-serif; text-transform: uppercase; font-size: 12px; letter-spacing: 2px;">Zum Test-Download Bereich</a>
             </div>
@@ -201,21 +201,21 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, 
     if (resend && customerEmail) {
       try {
         await resend.emails.send({
-          from: 'Herzstück Studio <onboarding@resend.dev>', // In Produktion eigene Domain nutzen
+          from: 'Nolea Studio <onboarding@resend.dev>', // In Produktion eigene Domain nutzen
           to: customerEmail,
-          subject: 'Vielen Dank! Deine herzstück Rezepte sind da ✨',
+          subject: 'Vielen Dank! Deine Nolea Produkte sind da ✨',
           html: `
             <div style="font-family: serif; color: #2D2A26; max-width: 600px; margin: 0 auto; padding: 40px; border: 1px solid #E5E2D9; border-radius: 20px;">
               <h1 style="font-style: italic; text-align: center;">Vielen Dank für dein Vertrauen!</h1>
               <p>Hallo,</p>
-              <p>vielen Dank für deinen Kauf bei Herzstück. Deine Rezepte sind nun zum Download bereit:</p>
+              <p>vielen Dank für deinen Kauf bei Nolea. Deine Guides sind nun zum Download bereit:</p>
               <p><strong>${recipeTitles}</strong></p>
               <div style="text-align: center; margin: 40px 0;">
                 <a href="${APP_URL}/success" style="background-color: #8A9A5B; color: white; padding: 15px 30px; text-decoration: none; border-radius: 30px; font-weight: bold; font-family: sans-serif; text-transform: uppercase; font-size: 12px; letter-spacing: 2px;">Zum Download-Bereich</a>
               </div>
               <p style="font-size: 12px; color: #6B6658;">Der Download-Link ist 48 Stunden gültig. Falls du Fragen hast, antworte einfach auf diese Email.</p>
               <hr style="border: 0; border-top: 1px solid #F2EFE9; margin: 30px 0;" />
-              <p style="font-style: italic; font-size: 14px; text-align: center;">Dein Herzstück Team</p>
+              <p style="font-style: italic; font-size: 14px; text-align: center;">Dein Nolea Team</p>
             </div>
           `
         });

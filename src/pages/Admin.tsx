@@ -24,7 +24,7 @@ export function Admin() {
     description: '',
     price: 0,
     imageUrl: '',
-    category: 'Pasta',
+    category: 'Lifestyle',
     contentUrl: '', // URL to the PDF
   });
 
@@ -77,8 +77,8 @@ export function Admin() {
     e.preventDefault();
     try {
       await createRecipe(newRecipe);
-      toast.success('Rezept hinzugefügt!');
-      setNewRecipe({ title: '', description: '', price: 0, imageUrl: '', category: 'Pasta', contentUrl: '' });
+      toast.success('Produkt hinzugefügt!');
+      setNewRecipe({ title: '', description: '', price: 0, imageUrl: '', category: 'Lifestyle', contentUrl: '' });
       const r = await getAllRecipes();
       setRecipes(r);
     } catch (error) {
@@ -87,7 +87,7 @@ export function Admin() {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Rezept wirklich löschen?')) {
+    if (window.confirm('Produkt wirklich löschen?')) {
       await deleteRecipe(id);
       toast.success('Gelöscht');
       setRecipes(recipes.filter(r => r.id !== id));
@@ -163,7 +163,7 @@ export function Admin() {
             onClick={() => setActiveTab('recipes')}
             className={`flex items-center gap-3 p-3 rounded-xl transition-all text-xs font-bold uppercase tracking-wider ${activeTab === 'recipes' ? 'bg-[#8A9A5B] text-white shadow-sm' : 'text-[#6B6658] hover:bg-[#F2EFE9]'}`}
           >
-            <Utensils size={18} strokeWidth={1.5} /> Rezepte
+            <Utensils size={18} strokeWidth={1.5} /> Produkte
           </button>
           <button 
             data-testid="nav-orders"
@@ -187,13 +187,13 @@ export function Admin() {
         {activeTab === 'recipes' ? (
           <div id="recipe-management">
             <div className="flex justify-between items-center mb-10">
-              <h2 className="text-3xl font-serif italic text-[#2D2A26]">Rezepte Verwalten</h2>
+              <h2 className="text-3xl font-serif italic text-[#2D2A26]">Produkte Verwalten</h2>
               <button 
                 id="btn-add-recipe"
                 className="bg-[#2D2A26] text-white px-6 py-3 rounded-xl flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:bg-black transition-all shadow-lg"
                 onClick={() => document.getElementById('add-recipe-modal')?.scrollIntoView({ behavior: 'smooth' })}
               >
-                <Plus size={18} /> Neues Rezept
+                <Plus size={18} /> Neues Produkt
               </button>
             </div>
 
@@ -234,7 +234,7 @@ export function Admin() {
 
             {/* Add Recipe Form */}
             <div id="add-recipe-modal" className="bg-white rounded-[2rem] shadow-sm border border-[#E5E2D9] p-10">
-              <h3 className="text-xl font-serif italic mb-8 text-[#2D2A26]">Neues Rezept hinzufügen</h3>
+              <h3 className="text-xl font-serif italic mb-8 text-[#2D2A26]">Neues Produkt hinzufügen</h3>
               <form onSubmit={handleAddRecipe} className="grid grid-cols-1 md:grid-cols-2 gap-8" id="form-recipe">
                 <div>
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6658] mb-3">Titel</label>
@@ -255,10 +255,10 @@ export function Admin() {
                     onChange={e => setNewRecipe({ ...newRecipe, category: e.target.value })}
                     className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#8A9A5B] transition-colors"
                   >
-                    <option>Pasta</option>
-                    <option>Vegan</option>
-                    <option>Brunch</option>
-                    <option>Dessert</option>
+                    <option>Lifestyle</option>
+                    <option>Wellness</option>
+                    <option>Food</option>
+                    <option>Business</option>
                     <option>Quick</option>
                   </select>
                 </div>
@@ -308,7 +308,7 @@ export function Admin() {
                 </div>
                 <div className="md:col-span-2">
                   <button id="btn-save-recipe" className="w-full bg-[#8A9A5B] text-white py-4 rounded-xl font-bold uppercase tracking-widest text-xs shadow-lg shadow-[#8A9A5B]/20 hover:bg-[#6B7A46] transition-all mt-4">
-                    Rezept Veröffentlichen
+                    Produkt Veröffentlichen
                   </button>
                 </div>
               </form>

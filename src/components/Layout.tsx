@@ -16,7 +16,7 @@ export function Navigation() {
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#E5E2D9]">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
         <Link to="/" className="text-2xl font-serif font-bold italic tracking-tight text-[#2D2A26]">
-          Herzstück
+          Nolea
         </Link>
 
         <div className="hidden md:flex gap-8 items-center">
@@ -86,18 +86,18 @@ export function Footer() {
     <footer className="bg-white border-t border-[#E5E2D9] pt-16 pb-24">
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12 text-[#2D2A26]">
         <div>
-          <h3 className="text-xl font-serif font-bold italic mb-4">Herzstück</h3>
+          <h3 className="text-xl font-serif font-bold italic mb-4">Nolea</h3>
           <p className="text-[#6B6658] font-serif italic text-sm leading-relaxed">
-            Exquisite Rezepte für moderne Frauen. <br />
-            Trends, Qualität und Leidenschaft in jeder Anleitung.
+            Exquisite digitale Produkte für einen bewussten Lebensstil. <br />
+            Inspiration, Qualität und Ästhetik in jedem Guide.
           </p>
         </div>
         <div>
           <h4 className="text-xs font-bold uppercase tracking-widest text-[#2D2A26] mb-6">Shop</h4>
           <ul className="flex flex-col gap-3 text-[#6B6658] text-sm">
-            <li><Link to="/shop" className="hover:text-[#8A9A5B] transition-colors">Alle Rezepte</Link></li>
-            <li><Link to="/shop?cat=vegan" className="hover:text-[#8A9A5B] transition-colors">Vegane Trends</Link></li>
-            <li><Link to="/shop?cat=pasta" className="hover:text-[#8A9A5B] transition-colors">Pasta Serien</Link></li>
+            <li><Link to="/shop" className="hover:text-[#8A9A5B] transition-colors">Alle Produkte</Link></li>
+            <li><Link to="/shop?cat=lifestyle" className="hover:text-[#8A9A5B] transition-colors">Lifestyle Guides</Link></li>
+            <li><Link to="/shop?cat=wellness" className="hover:text-[#8A9A5B] transition-colors">Wellness & Mindset</Link></li>
           </ul>
         </div>
         <div>
@@ -110,7 +110,7 @@ export function Footer() {
         </div>
       </div>
       <div className="max-w-7xl mx-auto px-6 mt-16 pt-8 border-t border-[#F2EFE9] flex flex-col md:flex-row justify-between items-center text-[10px] text-[#6B6658] uppercase tracking-[0.2em] gap-4">
-        <span>© 2024 Herzstück Studio &bull; Alle Rechte vorbehalten</span>
+        <span>© 2024 Nolea Studio &bull; Alle Rechte vorbehalten</span>
         <div className="flex gap-6 items-center">
           <span className="flex items-center gap-1.5"><ShoppingBasket size={12}/> Stripe Checkout</span>
           <span className="flex items-center gap-1.5">PayPal Ready</span>

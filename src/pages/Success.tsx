@@ -24,7 +24,7 @@ export function Success() {
         
         <h1 className="text-4xl font-serif italic text-[#2D2A26] mb-4">Vielen Dank für deinen Kauf!</h1>
         <p className="text-[#6B6658] mb-10 leading-relaxed font-serif italic text-lg">
-          Dein Rezept-Bundle ist bereit. Wir haben dir eine Bestätigung per E-Mail geschickt.
+          Deine digitalen Produkte sind bereit. Wir haben dir eine Bestätigung per E-Mail geschickt.
         </p>
 
         <div className="bg-[#F2EFE9] rounded-2xl p-6 mb-10 border border-[#E5E2D9]">

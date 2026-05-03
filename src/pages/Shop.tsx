@@ -9,7 +9,7 @@ export function Shop() {
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState('Alle');
 
-  const categories = ['Alle', 'Pasta', 'Vegan', 'Brunch', 'Dessert', 'Quick'];
+  const categories = ['Alle', 'Lifestyle', 'Wellness', 'Food', 'Business', 'Quick'];
 
   useEffect(() => {
     getAllRecipes().then(setRecipes).finally(() => setLoading(false));
@@ -23,7 +23,7 @@ export function Shop() {
     <div className="bg-[#FAF9F6] min-h-screen py-16">
       <div className="max-w-7xl mx-auto px-6">
         <header className="mb-16">
-          <h1 className="text-5xl font-serif italic text-[#2D2A26] mb-6">Alle Rezepte</h1>
+          <h1 className="text-5xl font-serif italic text-[#2D2A26] mb-6">Alle Produkte</h1>
           
           <div className="flex flex-wrap gap-4 items-center">
             <div className="flex items-center gap-2 text-[#6B6658] mr-4 uppercase tracking-[0.2em] text-[10px] font-bold">
@@ -61,7 +61,7 @@ export function Shop() {
         ) : (
           <div className="text-center py-24 bg-white rounded-[2.5rem] border border-[#E5E2D9]">
             <p className="text-[#6B6658] font-serif italic text-xl">
-              Keine Rezepte in dieser Kategorie gefunden.
+              Keine Produkte in dieser Kategorie gefunden.
             </p>
           </div>
         )}

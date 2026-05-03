@@ -10,8 +10,10 @@ import { Admin } from './pages/Admin';
 import { Success } from './pages/Success';
 import { Impressum } from './pages/Impressum';
 import { testConnection } from './lib/firebase';
+import { useUserSync } from './hooks/useUserSync';
 
 function App() {
+  useUserSync();
   useEffect(() => {
     testConnection();
   }, []);

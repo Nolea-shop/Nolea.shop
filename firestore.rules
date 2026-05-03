@@ -21,8 +21,8 @@ service cloud.firestore {
 
     function isAdmin() {
       return isSignedIn() && (
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
-        request.auth.token.email == 'julianlegendstar@gmail.com'
+        request.auth.token.email == 'julianlegendstar@gmail.com' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
       );
     }
 
@@ -60,9 +60,11 @@ service cloud.firestore {
 
     // Validate User Profile
     function isValidUserProfile(data) {
-      return data.keys().hasAll(['email', 'role']) &&
+      return data.keys().hasAll(['email', 'role', 'createdAt', 'updatedAt']) &&
              data.email is string &&
-             data.role in ['user', 'admin'];
+             data.role in ['user', 'admin'] &&
+             data.createdAt is timestamp &&
+             data.updatedAt is timestamp;
     }
 
     // Recipes: Anyone can read, only Admin can write

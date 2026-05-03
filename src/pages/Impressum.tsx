@@ -12,7 +12,7 @@ export function Impressum() {
           <section>
             <h2 className="text-xs font-bold uppercase tracking-widest text-[#9a4024] mb-4">Angaben gemäß § 5 TMG</h2>
             <p className="text-stone-600 font-serif text-lg leading-relaxed">
-              Herzstück Studio <br />
+              Nolea Studio <br />
               Heimatstraße 12 <br />
               10115 Berlin <br />
               Deutschland
@@ -23,7 +23,7 @@ export function Impressum() {
             <h2 className="text-xs font-bold uppercase tracking-widest text-[#9a4024] mb-4">Kontakt</h2>
             <p className="text-stone-600 font-serif text-lg leading-relaxed">
               Telefon: +49 (0) 123 456789 <br />
-              E-Mail: hello@herzstueck-shop.de
+              E-Mail: hello@nolea-studio.de
             </p>
           </section>
 

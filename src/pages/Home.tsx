@@ -35,7 +35,7 @@ export function Home() {
               Neuerscheinung
             </span>
             <h1 className="text-4xl md:text-6xl font-serif italic mb-8 leading-tight">
-              Trendige Soul-Food <br /> Rezepte für dich.
+              Trendige Lifestyle <br /> Guides für dich.
             </h1>
             <Link 
               to="/shop" 
@@ -51,11 +51,11 @@ export function Home() {
       <section className="py-16 max-w-7xl mx-auto px-6">
         <div className="flex justify-between items-end mb-10">
           <div>
-            <h2 className="text-3xl font-serif italic text-[#2D2A26] mb-2">Aktuelle Trends</h2>
-            <p className="text-[#6B6658] text-sm font-sans uppercase tracking-[0.1em]">Handverlesene Rezepte für diese Woche.</p>
+            <h2 className="text-3xl font-serif italic text-[#2D2A26] mb-2">Aktuelle Highlights</h2>
+            <p className="text-[#6B6658] text-sm font-sans uppercase tracking-[0.1em]">Handverlesene Guides für diese Woche.</p>
           </div>
           <Link to="/shop" className="text-[#8A9A5B] text-sm font-bold uppercase tracking-wider flex items-center gap-2 hover:gap-3 transition-all">
-            Alle Rezepte <ArrowRight size={16} />
+            Alle Produkte <ArrowRight size={16} />
           </Link>
         </div>
 
