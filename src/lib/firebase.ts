@@ -4,7 +4,7 @@ import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+export const db = getFirestore(app); // Standard-Datenbank nutzen, keine spezifische ID
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 
