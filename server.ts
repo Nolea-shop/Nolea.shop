@@ -164,7 +164,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
       },
     });
 
-    res.json({ id: session.id });
+    res.json({ id: session.id, url: session.url });
   } catch (error: any) {
     console.error('Checkout error:', error);
     res.status(500).json({ error: error.message });

@@ -47,34 +47,19 @@ export function Cart() {
       });
 
       console.log('[Checkout] Server-Antwort Status:', response.status, response.statusText);
-
+      
       // Prüfe ob Antwort ok ist
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(`Server-Fehler: ${response.status} ${response.statusText} - ${errorData.error || 'Unbekannter Fehler'}`);
       }
-
-      const data = await response.json();
-      console.log('[Checkout] Server-Antwort Daten:', data);
-
-      const { id: sessionId } = data;
-      if (!sessionId) {
-        throw new Error('Stripe Session ID fehlt in der Antwort - prüfe Server-Logs');
-      }
-
-      console.log('[Checkout] Stripe Session ID:', sessionId);
-
-      const stripe = await getStripe();
-      console.log('[Checkout] Stripe.js geladen:', !!stripe);
-
-      if (!stripe) {
-        throw new Error('Stripe.js nicht geladen - prüfe VITE_STRIPE_PUBLISHABLE_KEY in .env');
-      }
-
-      const { error: stripeError } = await stripe.redirectToCheckout({ sessionId });
       
-      if (stripeError) {
-        throw new Error(`Stripe Fehler: ${stripeError.message}`);
+      const { url } = await response.json();
+      console.log('[Checkout] Server-Antwort Daten:', { url });
+      
+      if (url) {
+        window.location.href = url;
+      }
       }
 
       console.log('[Checkout] Weiterleitung zu Stripe erfolgreich');
