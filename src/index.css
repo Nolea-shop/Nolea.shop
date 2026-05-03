@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -6,11 +6,16 @@
   --font-serif: "Playfair Display", serif;
   
   --color-primary-sage: #8A9A5B;
+  --color-primary-sage-dark: #6B7A46;
   --color-dark-text: #2D2A26;
   --color-muted-text: #6B6658;
   --color-base-creme: #FAF9F6;
   --color-beige-subtle: #F2EFE9;
   --color-border-subtle: #E5E2D9;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -19,11 +24,62 @@ body {
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 ::-webkit-scrollbar-track {
-  @apply bg-stone-100;
+  @apply bg-[#F2EFE9];
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-stone-300 rounded-full hover:bg-stone-400 transition-colors;
+  @apply bg-[#C5C2B9] rounded-full hover:bg-[#8A9A5B] transition-colors;
+}
+
+/* Selection styling */
+::selection {
+  @apply bg-[#8A9A5B]/20 text-[#2D2A26];
+}
+
+/* Focus visible for accessibility */
+*:focus-visible {
+  @apply outline-2 outline-offset-2 outline-[#8A9A5B];
+}
+
+/* Button press effect */
+.btn-press {
+  @apply active:scale-[0.97] transition-transform duration-100;
+}
+
+/* Card hover lift effect */
+.card-lift {
+  @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg;
+}
+
+/* Image zoom on hover */
+.img-zoom {
+  @apply transition-transform duration-500 hover:scale-105;
+}
+
+/* Stagger animation delays */
+.stagger-1 { animation-delay: 100ms; }
+.stagger-2 { animation-delay: 200ms; }
+.stagger-3 { animation-delay: 300ms; }
+.stagger-4 { animation-delay: 400ms; }
+.stagger-5 { animation-delay: 500ms; }
+
+/* Glass effect */
+.glass {
+  @apply bg-white/80 backdrop-blur-md;
+}
+
+/* Gradient text */
+.gradient-text {
+  @apply bg-gradient-to-r from-[#8A9A5B] to-[#6B7A46] bg-clip-text text-transparent;
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
