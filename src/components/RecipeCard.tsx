@@ -45,6 +45,7 @@ export function RecipeCard({ recipe }: Props) {
           <button 
             onClick={() => addToCart(recipe)}
             className="p-2.5 bg-[#F2EFE9] text-[#2D2A26] rounded-full hover:bg-[#8A9A5B] hover:text-white transition-colors"
+            title="In den Warenkorb"
           >
             <ShoppingBasket size={18} strokeWidth={1.5} />
           </button>

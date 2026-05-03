@@ -52,7 +52,7 @@ export function Cart() {
         </div>
         <h2 className="text-3xl font-serif italic text-[#2D2A26] mb-4">Dein Warenkorb ist leer</h2>
         <p className="text-[#6B6658] mb-10 max-w-sm text-sm">
-          Es scheint, als hättest du noch keine Rezepte hinzugefügt. Entdecke unsere neuesten Food-Trends!
+          Es scheint, als hättest du noch keine Guides hinzugefügt. Entdecke unsere neuesten digitalen Produkte!
         </p>
         <Link 
           to="/shop" 
