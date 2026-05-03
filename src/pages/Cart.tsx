@@ -31,6 +31,11 @@ export function Cart() {
 
     setIsCheckingOut(true);
     try {
+      // Debug-Logging
+      console.log('[Checkout] Starte Checkout für User:', user.uid, user.email);
+      console.log('[Checkout] Warenkorb Artikel:', cart.length);
+      console.log('[Checkout] Sende Daten:', { items: cart, userId: user.uid, userEmail: user.email });
+
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -41,14 +46,48 @@ export function Cart() {
         }),
       });
 
-      const { id } = await response.json();
-      const stripe = await getStripe();
-      if (stripe) {
-        await (stripe as any).redirectToCheckout({ sessionId: id });
+      console.log('[Checkout] Server-Antwort Status:', response.status, response.statusText);
+
+      // Prüfe ob Antwort ok ist
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`Server-Fehler: ${response.status} ${response.statusText} - ${errorData.error || 'Unbekannter Fehler'}`);
       }
-    } catch (error) {
-      console.error('Checkout error:', error);
-      toast.error('Fehler beim Starten des Checkouts.');
+
+      const data = await response.json();
+      console.log('[Checkout] Server-Antwort Daten:', data);
+
+      const { id: sessionId } = data;
+      if (!sessionId) {
+        throw new Error('Stripe Session ID fehlt in der Antwort - prüfe Server-Logs');
+      }
+
+      console.log('[Checkout] Stripe Session ID:', sessionId);
+
+      const stripe = await getStripe();
+      console.log('[Checkout] Stripe.js geladen:', !!stripe);
+
+      if (!stripe) {
+        throw new Error('Stripe.js nicht geladen - prüfe VITE_STRIPE_PUBLISHABLE_KEY in .env');
+      }
+
+      const { error: stripeError } = await stripe.redirectToCheckout({ sessionId });
+      
+      if (stripeError) {
+        throw new Error(`Stripe Fehler: ${stripeError.message}`);
+      }
+
+      console.log('[Checkout] Weiterleitung zu Stripe erfolgreich');
+    } catch (error: any) {
+      console.error('[Checkout] Fehler:', error);
+      toast.error(`Checkout fehlgeschlagen: ${error.message || 'Unbekannter Fehler'}`, {
+        duration: 5000,
+        style: {
+          background: '#FEF2F2',
+          color: '#DC2626',
+          border: '1px solid #FECACA',
+        },
+      });
     } finally {
       setIsCheckingOut(false);
     }

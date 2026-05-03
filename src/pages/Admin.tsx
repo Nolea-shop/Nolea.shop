@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { motion } from 'motion/react';
 import { auth } from '../lib/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
@@ -32,6 +33,11 @@ export function Admin() {
     contentUrl: '',
     isOnline: true,
   });
+
+  // Publishing progress states
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishProgress, setPublishProgress] = useState(0);
+  const [publishStage, setPublishStage] = useState('');
 
   const [passwordInput, setPasswordInput] = useState('');
   const [passwordAuth, setPasswordAuth] = useState(false);
@@ -102,17 +108,53 @@ export function Admin() {
 
   const handleAddRecipe = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsPublishing(true);
+    setPublishProgress(0);
+    setPublishStage('Validierung...');
+
     try {
+      // Schritt 1: Validierung (simuliert)
+      await new Promise(resolve => setTimeout(resolve, 300));
+      setPublishProgress(20);
+      setPublishStage('Produkt wird erstellt...');
+
+      // Schritt 2: Produkt erstellen
       await createRecipe(newRecipe);
-      toast.success('Produkt hinzugefügt und veröffentlicht!');
+      setPublishProgress(60);
+      setPublishStage('Assets werden verarbeitet...');
+
+      // Schritt 3: Verarbeitung (simuliert)
+      await new Promise(resolve => setTimeout(resolve, 400));
+      setPublishProgress(80);
+      setPublishStage('Finalisiere...');
+
+      // Erfolg
+      toast.success('Produkt hinzugefügt und veröffentlicht!', {
+        icon: '✅',
+        duration: 3000,
+      });
+
       setNewRecipe({ title: '', description: '', price: 0, imageUrl: '', category: 'Lifestyle', contentUrl: '', isOnline: true });
+      setPublishProgress(100);
+      setPublishStage('Abgeschlossen');
+
       await loadData();
-      // Scroll to top to see the new product in the table
       window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Fortschritt zurücksetzen nach kurzer Verzögerung
+      setTimeout(() => {
+        setPublishProgress(0);
+        setPublishStage('');
+        setIsPublishing(false);
+      }, 2000);
+
     } catch (error: any) {
       console.error('Save error details:', error);
       const errorMessage = error?.message || String(error);
       toast.error(`Fehler: ${errorMessage.substring(0, 100)}`);
+      setPublishProgress(0);
+      setPublishStage('');
+      setIsPublishing(false);
     }
   };
 
@@ -456,9 +498,64 @@ export function Admin() {
                     className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#8A9A5B] transition-colors"
                   />
                 </div>
+                {/* Progress Bar & Animation when publishing */}
+                {isPublishing && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-6 p-4 bg-[#F2EFE9] border border-[#E5E2D9] rounded-xl"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold uppercase tracking-widest text-[#6B6658]">
+                        {publishStage || 'Verarbeitung...'}
+                      </span>
+                      <span className="text-xs text-[#6B6658]">{publishProgress}%</span>
+                    </div>
+                    <div className="w-full bg-[#E5E2D9] rounded-full h-2 overflow-hidden">
+                      <motion.div
+                        className="h-full bg-[#8A9A5B]"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${publishProgress}%` }}
+                        transition={{ duration: 0.3, ease: 'easeOut' }}
+                      />
+                    </div>
+                    <div className="mt-2 flex items-center gap-2 text-xs text-[#6B6658]">
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                      >
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                        </svg>
+                      </motion.div>
+                      <span>Bitte warten, Produkt wird veröffentlicht...</span>
+                    </div>
+                  </motion.div>
+                )}
+
                 <div className="md:col-span-2">
-                  <button id="btn-save-recipe" type="submit" className="w-full bg-[#8A9A5B] text-white py-4 rounded-xl font-bold uppercase tracking-widest text-xs shadow-lg shadow-[#8A9A5B]/20 hover:bg-[#6B7A46] transition-all mt-4">
-                    Produkt Veröffentlichen
+                  <button 
+                    id="btn-save-recipe" 
+                    type="submit" 
+                    disabled={isPublishing}
+                    className={`w-full py-4 rounded-xl font-bold uppercase tracking-widest text-xs shadow-lg transition-all mt-4 ${
+                      isPublishing
+                        ? 'bg-[#E5E2D9] text-[#6B6658] cursor-not-allowed'
+                        : 'bg-[#8A9A5B] text-white hover:bg-[#6B7A46] shadow-[#8A9A5B]/20'
+                    }`}
+                  >
+                    {isPublishing ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+                          className="w-4 h-4 border-2 border-[#6B6658] border-t-transparent rounded-full"
+                        />
+                        Veröffentliche...
+                      </span>
+                    ) : (
+                      'Produkt Veröffentlichen'
+                    )}
                   </button>
                 </div>
               </form>
