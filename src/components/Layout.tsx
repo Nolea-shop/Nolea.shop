@@ -347,6 +347,11 @@ export function Footer() {
             </span>
           </div>
         </div>
+        
+        {/* Designed by sssalty */}
+        <div className="text-center text-[10px] text-[#6B6658] py-4 mt-4 border-t border-[#F2EFE9] opacity-60">
+          designed by sssalty
+        </div>
       </div>
     </footer>
   );
