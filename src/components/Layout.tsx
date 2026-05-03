@@ -333,6 +333,7 @@ export function Footer() {
               <li><Link to="/impressum" className="hover:text-[#8A9A5B] transition-colors">Impressum</Link></li>
               <li><Link to="/datenschutz" className="hover:text-[#8A9A5B] transition-colors">Datenschutz</Link></li>
               <li><Link to="/agb" className="hover:text-[#8A9A5B] transition-colors">AGB</Link></li>
+              <li><Link to="/admin" className="hover:text-[#8A9A5B] transition-colors text-xs opacity-50 mt-2">Admin Terminal</Link></li>
             </ul>
           </div>
         </div>
