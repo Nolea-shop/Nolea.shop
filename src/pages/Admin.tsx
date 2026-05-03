@@ -28,7 +28,22 @@ export function Admin() {
     contentUrl: '', // URL to the PDF
   });
 
-  const isAdmin = user?.email === 'julianlegendstar@gmail.com';
+  const [passwordInput, setPasswordInput] = useState('');
+  const [passwordAuth, setPasswordAuth] = useState(false);
+  
+  const ADMIN_PASSWORD = '24211vjß051vj89058901jv51j1jj890v511111j8v598v5901890v51vßüa';
+
+  const isAdmin = user?.email === 'julianlegendstar@gmail.com' || passwordAuth;
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordInput === ADMIN_PASSWORD) {
+      setPasswordAuth(true);
+      toast.success('Zugang via Passwort gewährt!');
+    } else {
+      toast.error('Falsches Passwort');
+    }
+  };
 
   useEffect(() => {
     if (isAdmin) {
@@ -113,9 +128,28 @@ export function Admin() {
         <p className="text-[#6B6658] mb-8 max-w-sm text-sm">
           {user 
             ? `Eingeloggt als ${user.email}. Dieses Konto hat keine Admin-Rechte.`
-            : 'Bitte logge dich mit deinem Admin-Konto ein, um fortzufahren.'}
+            : 'Bitte logge dich ein oder gib das Passwort ein.'}
         </p>
         
+        {/* Passwort-Formular */}
+        <form onSubmit={handlePasswordSubmit} className="w-full max-w-sm mb-8">
+          <div className="flex gap-2">
+            <input 
+              type="password" 
+              placeholder="Admin Passwort" 
+              value={passwordInput}
+              onChange={e => setPasswordInput(e.target.value)}
+              className="flex-1 bg-white border border-[#E5E2D9] rounded-xl p-3 text-sm focus:outline-none focus:border-[#8A9A5B]"
+            />
+            <button 
+              type="submit"
+              className="bg-[#2D2A26] text-white px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-black transition-all"
+            >
+              Einloggen
+            </button>
+          </div>
+        </form>
+
         {user ? (
           <button 
             onClick={() => auth.signOut()}
@@ -131,7 +165,7 @@ export function Admin() {
             }}
             className="bg-[#8A9A5B] text-white px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#6B7A46] transition-all flex items-center gap-2"
           >
-            <LogIn size={16} /> Jetzt Einloggen
+            <LogIn size={16} /> Mit Google Einloggen
           </button>
         )}
       </div>
