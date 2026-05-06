@@ -150,11 +150,16 @@ export function Admin() {
 
     } catch (error: any) {
       console.error('Save error details:', error);
-      const errorMessage = error?.message || String(error);
-      toast.error(`Fehler: ${errorMessage.substring(0, 100)}`);
+      // Reset states immediately to avoid stuck UI
+      setIsPublishing(false);
       setPublishProgress(0);
       setPublishStage('');
-      setIsPublishing(false);
+      
+      const errorMessage = error?.message || String(error);
+      toast.error(`Fehler: ${errorMessage.substring(0, 100)}`, { 
+        duration: 6000,
+        icon: '⚠'
+      });
     }
   };
 
