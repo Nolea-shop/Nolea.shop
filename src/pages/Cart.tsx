@@ -60,9 +60,7 @@ export function Cart() {
       if (url) {
         window.location.href = url;
       }
-      }
-
-      console.log('[Checkout] Weiterleitung zu Stripe erfolgreich');
+      console.log("[Checkout] Weiterleitung zu Stripe erfolgreich");
     } catch (error: any) {
       console.error('[Checkout] Fehler:', error);
       toast.error(`Checkout fehlgeschlagen: ${error.message || 'Unbekannter Fehler'}`, {
