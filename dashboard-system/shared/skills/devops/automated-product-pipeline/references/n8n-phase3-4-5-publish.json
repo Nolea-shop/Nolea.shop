@@ -1,0 +1,187 @@
+{
+  "name": "Herzstueck - Phase 3+4+5 Publish Engine",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "phase3-input",
+      "name": "Phase 3 Input",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "prompt": "=Erstelle einen kompletten Content-Plan fuer das Produkt:\nTitel: {{$json.suggested_title}}\nTyp: {{$json.product_type}}\nPreis: {{$json.suggested_price}}EUR\nSeiten: {{$json.estimated_pages}}\nKey Topics: {{$json.key_topics_to_cover.join(', ')}}\n\nErstelle STRIKT folgendes JSON:\n{\n  \"product\": {\n    \"slug\": \"...\",\n    \"title\": \"...\",\n    \"subtitle\": \"...\",\n    \"description\": \"...\",\n    \"features\": [\"...\"],\n    \"faq\": [{\"q\":\"...\",\"a\":\"...\"}],\n    \"content_outline\": [\"Kapitel 1\", \"Kapitel 2\"],\n    \"price\": 7.99\n  },\n  \"social_posts\": [\n    {\n      \"post_number\": 1,\n      \"post_type\": \"carousel\",\n      \"caption\": \"...\",\n      \"hashtags\": [\"#backen\", \"#rezepte\"],\n      \"scheduled_day\": 0,\n      \"slides\": [{\"headline\":\"...\",\"body\":\"...\"}]\n    }\n  ]\n}"
+      },
+      "id": "content-gen",
+      "name": "Generate Content (AI)",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.stripe.com/v1/products",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {"name": "name", "value": "={{$json.product.title}}"},
+            {"name": "description", "value": "={{$json.product.description}}"},
+            {"name": "metadata[category]", "value": "={{$json.topic_summary || 'backen'}}"},
+            {"name": "metadata[slug]", "value": "={{$json.product.slug}}"},
+            {"name": "metadata[pages]", "value": "={{$json.estimated_pages}}"}
+          ]
+        }
+      },
+      "id": "stripe-product",
+      "name": "Stripe Create Product",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [660, 200],
+      "credentials": {"httpBasicAuth": "stripe-api"}
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.stripe.com/v1/prices",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {"name": "product", "value": "={{$json.stripe_product_id || $json.id}}"},
+            {"name": "unit_amount", "value": "={{$json.product.price * 100}}"},
+            {"name": "currency", "value": "eur"}
+          ]
+        }
+      },
+      "id": "stripe-price",
+      "name": "Stripe Create Price",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [860, 200],
+      "credentials": {"httpBasicAuth": "stripe-api"}
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.stripe.com/v1/payment_links",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {"name": "line_items[0][price]", "value": "={{$json.stripe_price_id || $json.id}}"},
+            {"name": "line_items[0][quantity]", "value": "1"},
+            {"name": "after_completion[type]", "value": "redirect"},
+            {"name": "after_completion[redirect][url]", "value": "https://herzstueck.de/danke/{{$json.product.slug}}"}
+          ]
+        }
+      },
+      "id": "stripe-link",
+      "name": "Stripe Payment Link",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1060, 200],
+      "credentials": {"httpBasicAuth": "stripe-api"}
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://herzstueck.de/api/n8n-product",
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [{"name": "x-n8n-secret", "value": "=changeme"}]},
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {"name": "slug", "value": "={{$json.product.slug}}"},
+            {"name": "title", "value": "={{$json.product.title}}"},
+            {"name": "subtitle", "value": "={{$json.product.subtitle}}"},
+            {"name": "price", "value": "={{$json.product.price}}"},
+            {"name": "description", "value": "={{$json.product.description}}"},
+            {"name": "features", "value": "={{$json.product.features}}"},
+            {"name": "faq", "value": "={{$json.product.faq}}"},
+            {"name": "stripe_payment_link", "value": "={{$json.stripe_payment_link || $json.url}}"}
+          ]
+        }
+      },
+      "id": "vercel-push",
+      "name": "Push to Vercel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [660, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v18.0/{{$credentials.facebook.pageId}}/feed",
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {"name": "message", "value": "={{$json.social_posts[0].caption}}"},
+            {"name": "link", "value": "={{$json.stripe_payment_link}}"}
+          ]
+        }
+      },
+      "id": "fb-post",
+      "name": "Facebook Page Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [860, 400],
+      "credentials": {"facebookGraphApi": "facebook-api"}
+    },
+    {
+      "parameters": {"unit": "hours", "amount": 24},
+      "id": "wait-24h",
+      "name": "Wait 24h",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [860, 550],
+      "webhookId": "wait-24"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v18.0/{{$credentials.facebook.pageId}}/feed",
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {"name": "message", "value": "={{$json.social_posts[1].caption}}"},
+            {"name": "link", "value": "={{$json.stripe_payment_link}}"}
+          ]
+        }
+      },
+      "id": "fb-post-2",
+      "name": "FB Post Day 1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1060, 550],
+      "credentials": {"facebookGraphApi": "facebook-api"}
+    }
+  ],
+  "connections": {
+    "Phase 3 Input": {"main": [[{"node": "Generate Content (AI)", "type": "main", "index": 0}]]},
+    "Generate Content (AI)": {
+      "main": [
+        [{"node": "Stripe Create Product", "type": "main", "index": 0}],
+        [{"node": "Push to Vercel", "type": "main", "index": 0}]
+      ]
+    },
+    "Stripe Create Product": {"main": [[{"node": "Stripe Create Price", "type": "main", "index": 0}]]},
+    "Stripe Create Price": {"main": [[{"node": "Stripe Payment Link", "type": "main", "index": 0}]]},
+    "Push to Vercel": {"main": [[{"node": "Facebook Page Post", "type": "main", "index": 0}]]},
+    "Facebook Page Post": {"main": [[{"node": "Wait 24h", "type": "main", "index": 0}]]},
+    "Wait 24h": {"main": [[{"node": "FB Post Day 1", "type": "main", "index": 0}]]}
+  },
+  "settings": {"executionOrder": "v1"},
+  "tags": ["herzstuck", "publish"]
+}

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Queue · System Tasks</title>
+    <link rel="stylesheet" href="magazine.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+    <script src="editorial.js" defer></script>
+</head>
+<body>
+    <div class="aurora-container">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+    <div class="noise-overlay"></div>
+
+    <nav class="top-nav">
+        <a href="/">Overview</a>
+        <a href="/tokens">Intelligence</a>
+        <a href="/health">Vitals</a>
+        <a href="/diary">History</a>
+        <a href="/tasks" class="active">Queue</a>
+    </nav>
+
+    <div class="container">
+        <header style="margin-bottom: 80px;">
+            <p class="uppercase-label gsap-reveal">Orchestration Layer</p>
+            <h1 class="gsap-reveal" style="font-size: 72px; line-height: 0.9;">Task <span class="italic">Queue</span></h1>
+        </header>
+
+        <div class="bento-grid">
+            <!-- Summary Stats -->
+            <div id="stats-container" class="col-12 bento-grid" style="margin-bottom: 40px;">
+                <!-- Dynamically filled -->
+            </div>
+
+            <!-- Task List -->
+            <div class="col-12" id="task-list">
+                <!-- Dynamically filled -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function getStatusColor(s) {
+            const colors = { 'completed': '--accent-sky', 'running': '--accent-coral', 'pending': '--accent-gold', 'cancelled': '--ink' };
+            return colors[s] || '--ink';
+        }
+
+        async function load() {
+            try {
+                const r = await fetch('/api/tasks');
+                const tasks = await r.json();
+                
+                const stats = { completed: 0, running: 0, pending: 0 };
+                tasks.forEach(t => { if(stats[t.status] !== undefined) stats[t.status]++; });
+
+                const statsGrid = document.getElementById('stats-container');
+                statsGrid.innerHTML = `
+                    <div class="card col-4 card--sky gsap-reveal">
+                        <p class="uppercase-label">Resolved</p>
+                        <div class="display-num" style="font-size: 48px; margin-top: 10px;">${stats.completed}</div>
+                    </div>
+                    <div class="card col-4 card--coral gsap-reveal">
+                        <p class="uppercase-label">Processing</p>
+                        <div class="display-num" style="font-size: 48px; margin-top: 10px;">${stats.running}</div>
+                    </div>
+                    <div class="card col-4 card--gold gsap-reveal">
+                        <p class="uppercase-label">Waiting</p>
+                        <div class="display-num" style="font-size: 48px; margin-top: 10px;">${stats.pending}</div>
+                    </div>
+                `;
+
+                const list = document.getElementById('task-list');
+                list.innerHTML = tasks.map((t, i) => `
+                    <div class="card gsap-reveal ${i % 2 === 0 ? 'card--rotated' : ''}" style="margin-bottom: 24px; padding: 30px;">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <p class="uppercase-label" style="font-size: 10px; opacity: 0.5;">${t.agent || 'system'}</p>
+                                <h3 class="italic" style="font-family: var(--font-serif); font-size: 24px; margin: 10px 0;">${t.title}</h3>
+                                <p style="opacity: 0.6; font-size: 14px; max-width: 600px;">${t.description || 'No additional details provided.'}</p>
+                            </div>
+                            <div class="pill pill--status" style="background: var(${getStatusColor(t.status)});">${t.status}</div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                gsap.to(".gsap-reveal", { opacity: 1, y: 0, duration: 1, stagger: 0.05, ease: "power4.out" });
+                lucide.createIcons();
+            } catch(e) {}
+        }
+        load();
+    </script>
+</body>
+</html>

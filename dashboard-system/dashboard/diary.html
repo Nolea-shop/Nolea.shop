@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diary · Human Activity</title>
+    <link rel="stylesheet" href="magazine.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://fastly.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+    <script src="editorial.js" defer></script>
+</head>
+<body>
+    <div class="aurora-container">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+    <div class="noise-overlay"></div>
+
+    <nav class="top-nav">
+        <a href="/">Overview</a>
+        <a href="/tokens">Intelligence</a>
+        <a href="/health">Vitals</a>
+        <a href="/diary" class="active">History</a>
+        <a href="/tasks">Queue</a>
+    </nav>
+
+    <div class="container">
+        <header style="margin-bottom: 80px;">
+            <p class="uppercase-label gsap-reveal">Chronicles / Archive</p>
+            <h1 class="gsap-reveal" style="font-size: 72px; line-height: 0.9;">System <span class="italic">Diary</span></h1>
+            <p class="gsap-reveal" style="opacity: 0.6; margin-top: 20px; max-width: 400px;">A documentation of human-agent interaction, session depth, and the evolution of intelligence.</p>
+        </header>
+
+        <div class="bento-grid">
+            <!-- Weekly Chart -->
+            <div class="card col-12 gsap-reveal">
+                <p class="uppercase-label">Activity Flux (7 Days)</p>
+                <div id="diary-chart" class="echarts-container" style="height: 400px; margin-top: 20px;"></div>
+            </div>
+
+            <!-- Recent Entries -->
+            <div class="col-12" style="margin-top: 60px;">
+                <h2 class="gsap-reveal" style="font-size: 42px; margin-bottom: 40px;"><span class="italic">Recent</span> Records</h2>
+                <div id="diary-list" style="display: grid; gap: 24px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ECharts Styling function
+        function getChartOption(data) {
+            return {
+                backgroundColor: 'transparent',
+                grid: { top: 40, right: 20, bottom: 40, left: 40, containLabel: true },
+                xAxis: {
+                    type: 'category',
+                    data: data.labels,
+                    axisLine: { lineStyle: { color: '#1a1a1a', opacity: 0.1 } },
+                    axisLabel: { color: '#1a1a1a', opacity: 0.6, fontFamily: 'Inter' }
+                },
+                yAxis: {
+                    type: 'value',
+                    splitLine: { lineStyle: { color: '#1a1a1a', opacity: 0.05, type: 'dashed' } },
+                    axisLabel: { color: '#1a1a1a', opacity: 0.6, fontFamily: 'Inter' }
+                },
+                series: [{
+                    data: data.values,
+                    type: 'line',
+                    smooth: true,
+                    symbolSize: 8,
+                    itemStyle: { color: '#ff5733' },
+                    lineStyle: { width: 4, shadowColor: 'rgba(255,87,31,0.3)', shadowBlur: 10 },
+                    areaStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: 'rgba(255,87,31,0.2)' },
+                            { offset: 1, color: 'rgba(255,87,31,0)' }
+                        ])
+                    }
+                }]
+            };
+        }
+
+        async function init() {
+            try {
+                // List Entries
+                const r = await fetch('/api/diary?limit=10');
+                const entries = await r.json();
+                const list = document.getElementById('diary-list');
+                
+                entries.forEach((e, idx) => {
+                    const card = document.createElement('div');
+                    card.className = `card gsap-reveal ${idx % 2 === 0 ? 'card--rotated' : ''}`;
+                    card.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <p class="uppercase-label">${e.date}</p>
+                                <h3 style="font-family: var(--font-serif); font-size: 28px; margin: 10px 0;">${e.title}</h3>
+                                <p style="opacity: 0.7; line-height: 1.6;">${e.summary || d.content.substring(0, 150) + '...'}</p>
+                            </div>
+                            <div class="pill pill--status">${e.session_id ? 'Session' : 'Log'}</div>
+                        </div>
+                    `;
+                    list.appendChild(card);
+                });
+
+                // Chart
+                const chartDom = document.getElementById('diary-chart');
+                const myChart = echarts.init(chartDom);
+                // Mock logic for demo since api might not have it yet
+                myChart.setOption(getChartOption({
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    values: [12, 19, 15, 25, 32, 28, 40]
+                }));
+
+                gsap.to(".gsap-reveal", { opacity: 1, y: 0, duration: 1, stagger: 0.05, ease: "power4.out" });
+            } catch(e) {}
+        }
+        init();
+    </script>
+</body>
+</html>

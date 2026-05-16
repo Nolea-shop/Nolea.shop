@@ -1,0 +1,1 @@
+['Plan with 12 nodes listed]\nUser: Go\nSCHRITT 1: Build Node 1 (Schedule Trigger) → Test → Review\nUser: Node 1 ist perfekt, weiter mit Node 2\nSCHRITT 2: Build Node 2 (Reddit RSS) → Test → Review\n... etc.\n```']

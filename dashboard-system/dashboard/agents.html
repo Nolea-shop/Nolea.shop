@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit · Agent Control</title>
+    <link rel="stylesheet" href="magazine.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="editorial.js" defer></script>
+</head>
+<body>
+    <div class="aurora-container">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-3"></div>
+    </div>
+    <div class="noise-overlay"></div>
+
+    <nav class="top-nav">
+        <a href="/">Overview</a>
+        <a href="/tokens">Intelligence</a>
+        <a href="/health">Vitals</a>
+        <a href="/diary">History</a>
+        <a href="/tasks">Queue</a>
+    </nav>
+
+    <div class="container">
+        <header style="margin-bottom: 80px;">
+            <p class="uppercase-label gsap-reveal">Multi-Agent Deployment</p>
+            <h1 class="gsap-reveal" style="font-size: 72px; line-height: 0.9;">Available <span class="italic">Units</span></h1>
+        </header>
+
+        <div id="agent-grid" class="bento-grid">
+            <!-- Dynamically filled -->
+        </div>
+
+        <!-- Command Output Modal -->
+        <div id="agent-result" style="display: none; margin-top: 40px;" class="gsap-reveal">
+            <div class="card">
+                <p class="uppercase-label">Dispatch Log</p>
+                <pre id="result-text" style="margin-top: 20px; font-family: var(--font-mono); font-size: 12px; line-height: 1.6; white-space: pre-wrap;"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function load() {
+            try {
+                const r = await fetch('/api/sub-agents');
+                const agents = await r.json();
+                const grid = document.getElementById('agent-grid');
+                grid.innerHTML = '';
+
+                agents.forEach((a, i) => {
+                    const category = a.name.split('-')[0];
+                    const catClass = category === 'social' ? 'card--coral' : category === 'dev' ? 'card--violet' : 'card--gold';
+                    
+                    const card = document.createElement('div');
+                    card.className = `card col-4 gsap-reveal ${catClass} ${i % 2 === 0 ? 'card--rotated' : ''}`;
+                    card.style.cursor = 'pointer';
+                    
+                    card.innerHTML = `
+                        <div class="section-num" style="font-size: 42px; opacity: 0.1;">0${i+1}</div>
+                        <p class="uppercase-label" style="font-size: 9px;">${category} · ${a.skill || 'autonomic'}</p>
+                        <h3 class="italic" style="font-family: var(--font-serif); font-size: 28px; margin: 15px 0;">${a.name.split('-').pop()}</h3>
+                        <p style="font-size: 12px; opacity: 0.6; line-height: 1.4; margin-bottom: 20px;">${a.description || 'Specialized autonomic agent module.'}</p>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <span class="pill" style="font-size: 8px;">${a.model || 'deepseek-v4'}</span>
+                            <span class="pill pill--status" style="font-size: 8px;">${a.approval ? 'requires approval' : 'auto'}</span>
+                        </div>
+                    `;
+
+                    // Click to launch
+                    card.addEventListener('click', async () => {
+                        const result = document.getElementById('agent-result');
+                        const text = document.getElementById('result-text');
+                        result.style.display = 'block';
+                        text.textContent = `🚀 Starting ${a.name}...`;
+                        gsap.to(".gsap-reveal", { opacity: 1, y: 0, duration: 0.5 });
+                        
+                        try {
+                            const resp = await fetch('/api/cmd', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ agent: a.name, command: a.description || 'start' })
+                            });
+                            const d = await resp.json();
+                            text.textContent = d.result || '✅ Launched successfully';
+                        } catch(e) {
+                            text.textContent = '❌ Error: ' + e.message;
+                        }
+                    });
+
+                    grid.appendChild(card);
+                });
+                
+                gsap.to(".gsap-reveal", { opacity: 1, y: 0, duration: 1, stagger: 0.05, ease: "power4.out" });
+                lucide.createIcons();
+            } catch(e) { console.error(e); }
+        }
+        load();
+    </script>
+</body>
+</html>

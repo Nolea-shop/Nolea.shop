@@ -1,0 +1,131 @@
+     1|{
+     2|  "id": "1zHhhqvq6dZZiqcc",
+     3|  "name": "Nolea Produkt und Content",
+     4|  "active": true,
+     5|  "createdAt": "2026-05-15 23:08:41.527",
+     6|  "updatedAt": "2026-05-15 23:08:55.702",
+     7|  "nodes": [
+     8|    {
+     9|      "id": "schedule-trigger",
+    10|      "name": "Schedule Trigger",
+    11|      "type": "n8n-nodes-base.scheduleTrigger",
+    12|      "typeVersion": 1,
+    13|      "position": [
+    14|        250,
+    15|        300
+    16|      ],
+    17|      "parameters": {
+    18|        "rule": {
+    19|          "interval": [
+    20|            {
+    21|              "field": "cronExpression",
+    22|              "expression": "0 8,12,16,20 * * *"
+    23|            }
+    24|          ]
+    25|        }
+    26|      }
+    27|    },
+    28|    {
+    29|      "id": "niche-selector",
+    30|      "name": "Nischen Selector",
+    31|      "type": "n8n-nodes-base.code",
+    32|      "typeVersion": 2,
+    33|      "position": [
+    34|        450,
+    35|        300
+    36|      ],
+    37|      "parameters": {
+    38|        "jsCode": "const niches = [\"Gebäck\", \"Gesundheit\", \"Produktivität\", \"Sport\"];\nreturn niches.map(n => ({json: {niche: n}}));"
+    39|      }
+    40|    },
+    41|    {
+    42|      "id": "http-request",
+    43|      "name": "HTTP Request",
+    44|      "type": "n8n-nodes-base.httpRequest",
+    45|      "typeVersion": 4.2,
+    46|      "position": [
+    47|        650,
+    48|        300
+    49|      ],
+    50|      "parameters": {
+    51|        "method": "POST",
+    52|        "url": "http://localhost:8383/api/calendar-entries",
+    53|        "sendBody": true,
+    54|        "bodyParameters": {
+    55|          "parameters": [
+    56|            {
+    57|              "name": "date",
+    58|              "value": "={{ $now.format(YYYY-MM-DD) }}"
+    59|            },
+    60|            {
+    61|              "name": "user",
+    62|              "value": "damian"
+    63|            },
+    64|            {
+    65|              "name": "project",
+    66|              "value": "NOLEA"
+    67|            },
+    68|            {
+    69|              "name": "title",
+    70|              "value": "={{ $json.niche }} Produkt generieren"
+    71|            },
+    72|            {
+    73|              "name": "desc",
+    74|              "value": "={{ $json.niche }} - Tägliche Produktion"
+    75|            },
+    76|            {
+    77|              "name": "type",
+    78|              "value": "product"
+    79|            },
+    80|            {
+    81|              "name": "status",
+    82|              "value": "in_progress"
+    83|            },
+    84|            {
+    85|              "name": "niche",
+    86|              "value": "={{ $json.niche }}"
+    87|            },
+    88|            {
+    89|              "name": "tags",
+    90|              "value": "n8n, nolea, {{ $json.niche }}"
+    91|            }
+    92|          ]
+    93|        },
+    94|        "options": {
+    95|          "timeout": 5000
+    96|        }
+    97|      }
+    98|    }
+    99|  ],
+   100|  "connections": {
+   101|    "Schedule Trigger": {
+   102|      "main": [
+   103|        [
+   104|          {
+   105|            "node": "Nischen Selector",
+   106|            "type": "main",
+   107|            "index": 0
+   108|          }
+   109|        ]
+   110|      ]
+   111|    },
+   112|    "Nischen Selector": {
+   113|      "main": [
+   114|        [
+   115|          {
+   116|            "node": "HTTP Request",
+   117|            "type": "main",
+   118|            "index": 0
+   119|          }
+   120|        ]
+   121|      ]
+   122|    }
+   123|  },
+   124|  "settings": {},
+   125|  "staticData": {
+   126|    "node:Schedule Trigger": {
+   127|      "recurrenceRules": []
+   128|    }
+   129|  },
+   130|  "credentials_required": []
+   131|}
