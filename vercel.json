@@ -1,17 +1,12 @@
 {
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "routes": [
-    { "src": "/api/stripe-webhook", "dest": "/api/stripe-webhook.ts" },
-    { "src": "/api/(.*)", "dest": "/api/$1.ts" },
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html", "headers": { "x-hermes-status": "spa-fallback-active" } }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
     {
-      "source": "/(.*)",
+      "source": "/api/(.*)",
       "headers": [
-        { "key": "x-hermes-deployment", "value": "fix-404-v2" }
+        { "key": "Access-Control-Allow-Origin", "value": "*" }
       ]
     }
   ]
