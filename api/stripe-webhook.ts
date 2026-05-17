@@ -78,7 +78,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                   <div style="text-align: center; margin: 40px 0;">
                     <a href="${APP_URL}/success" style="background-color: #8A9A5B; color: white; padding: 15px 30px; text-decoration: none; border-radius: 30px; font-weight: bold; font-family: sans-serif; text-transform: uppercase; font-size: 12px; letter-spacing: 2px;">Zum Download-Bereich</a>
                   </div>
-                  <p style="font-size: 12px; color: #6B6658;">Der Download-Link ist 48 Stunden gültig. Falls du Fragen hast, antworte einfach auf diese Email.</p>
+                  <p style="font-size: 12px; color: #6B6658;">Der Download-Link ist 24 Stunden gültig. Falls du Fragen hast, antworte einfach auf diese Email.</p>
                   <hr style="border: 0; border-top: 1px solid #F2EFE9; margin: 30px 0;" />
                   <p style="font-style: italic; font-size: 14px; text-align: center;">Dein Nolea Team</p>
                 </div>

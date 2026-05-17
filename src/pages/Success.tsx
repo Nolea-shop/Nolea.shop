@@ -32,7 +32,7 @@ export function Success() {
             <Download size={20} strokeWidth={1.5} /> Jetzt Herunterladen (PDF)
           </button>
           <p className="text-[10px] text-[#6B6658] uppercase tracking-[0.2em] font-bold">
-            Der Link ist 48 Stunden gültig.
+            Der Link ist 24 Stunden gültig.
           </p>
         </div>
 
