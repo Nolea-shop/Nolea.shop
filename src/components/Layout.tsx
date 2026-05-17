@@ -52,12 +52,6 @@ export function Navigation() {
             >
               Shop
             </Link>
-            <Link 
-              to="/impressum" 
-              className="font-sans text-xs font-bold uppercase tracking-widest px-2 py-2 text-[#6B6658] hover:text-[#2D2A26] transition-colors"
-            >
-              Impressum
-            </Link>
             {user && (
               <Link 
                 to="/admin" 
@@ -206,19 +200,6 @@ export function Navigation() {
                           {totalItems}
                         </span>
                       )}
-                    </Link>
-                    <Link 
-                      to="/impressum" 
-                      className="flex items-center gap-3 px-4 py-4 text-[#2D2A26] hover:bg-[#F2EFE9] rounded-xl transition-colors"
-                    >
-                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                        <polyline points="14,2 14,8 20,8"/>
-                        <line x1="16" x2="8" y1="13" y2="13"/>
-                        <line x1="16" x2="8" y1="17" y2="17"/>
-                        <polyline points="10,9 9,9 8,9"/>
-                      </svg>
-                      <span className="font-medium">Impressum</span>
                     </Link>
                     {user && (
                       <Link 

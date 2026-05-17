@@ -74,7 +74,7 @@ service cloud.firestore {
       allow read: if resource.data.isOnline == true || isAdmin() || resource.data.authorId == request.auth.uid;
       allow create: if isSignedIn() && (
         isAdmin() || 
-        (incoming().isUserGenerated == true && incoming().authorId == request.auth.uid)
+        (incoming().isUserGenerated == true && incoming().authorId == request.auth.uid && incoming().isOnline == true)
       ) && isValidRecipe(incoming());
       allow update: if (isAdmin() || (resource.data.authorId == request.auth.uid)) && isValidRecipe(incoming());
       allow delete: if isAdmin() || resource.data.authorId == request.auth.uid;

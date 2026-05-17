@@ -112,7 +112,7 @@ export function Admin() {
         authorId: user.uid,
         authorEmail: user.email || '',
         isUserGenerated: true,
-        isOnline: isAdmin ? newRecipe.isOnline : false // Creators start offline (draft)
+        isOnline: isAdmin ? newRecipe.isOnline : true // High-End Change: User products are online by default now
       });
       setPublishProgress(60);
       setPublishStage('Assets werden verarbeitet...');
