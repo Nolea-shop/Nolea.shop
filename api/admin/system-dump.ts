@@ -16,7 +16,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // Check authorization
   const authHeader = req.headers.authorization;
-  const adminKey = process.env.VITE_ADMIN_API_KEY;
+  // Use a proper backend secret, NOT VITE_
+  const adminKey = process.env.ADMIN_API_KEY;
 
   if (!adminKey || authHeader !== `Bearer ${adminKey}`) {
     return res.status(401).json({ error: 'Unauthorized AI access' });

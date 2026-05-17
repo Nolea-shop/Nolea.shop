@@ -18,7 +18,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     stripe: !!process.env.STRIPE_SECRET_KEY,
     resend: !!process.env.RESEND_API_KEY,
     webhook: !!process.env.STRIPE_WEBHOOK_SECRET,
-    adminKey: !!process.env.VITE_ADMIN_API_KEY
+    adminKey: !!process.env.ADMIN_API_KEY
   };
 
   return res.status(200).json(configStatus);
