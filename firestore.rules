@@ -74,14 +74,11 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // Orders: Owner and Admin can read, Owner can create 'pending'
+    // Orders: Owner and Admin can read. NO ONE can create/update directly anymore!
+    // High-End Security: Orders are only created by the System (Admin SDK) via Webhook.
     match /orders/{orderId} {
       allow read: if isOwner(existing().userId) || isAdmin();
-      allow create: if isSignedIn() && isValidOrder(incoming()) && incoming().status == 'pending';
-      // Only admins or system (via webhook) should update status, but since rules don't distinguish system user, 
-      // we'll allow admin to update anything, or users to potentially update if they are owner but only specific fields.
-      // Actually, standard security is that users shouldn't be able to mark their own orders as 'completed'.
-      allow update: if isAdmin() || (isOwner(existing().userId) && incoming().diff(existing()).affectedKeys().hasOnly(['status']) && existing().status == 'pending' && incoming().status == 'cancelled');
+      allow create, update, delete: if false; 
     }
 
     // Users: Owner and Admin can read, Owner can create/update their own profile

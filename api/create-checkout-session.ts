@@ -1,4 +1,15 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
+import admin from 'firebase-admin';
+
+// Initialize Firebase Admin if not already initialized
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}')),
+    projectId: 'gen-lang-client-0195318958'
+  });
+}
+
+const db = admin.firestore();
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS headers - secure to main domain
@@ -27,22 +38,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: 'Stripe not configured' });
   }
 
-  const { items, userId, userEmail } = req.body;
+  const { items: clientItems, userId, userEmail } = req.body;
 
-  if (!items || !items.length) {
+  if (!clientItems || !clientItems.length) {
     return res.status(400).json({ error: 'No items in cart' });
   }
 
   const APP_URL = process.env.APP_URL || 'https://www.nolea.shop';
 
   try {
+    // HIGH-END SECURITY: Verify prices server-side via Firestore
+    const validatedItems = [];
+    for (const item of clientItems) {
+      const recipeDoc = await db.collection('recipes').doc(item.id).get();
+      if (!recipeDoc.exists) {
+        throw new Error(`Produkt ${item.title} nicht gefunden.`);
+      }
+      const actualData = recipeDoc.data();
+      if (!actualData?.isOnline) {
+        throw new Error(`Produkt ${item.title} ist momentan nicht verfügbar.`);
+      }
+      
+      // Use price from DB, not from client request
+      validatedItems.push({
+        id: item.id,
+        title: actualData.title,
+        price: actualData.price, // In cents
+        imageUrl: actualData.imageUrl
+      });
+    }
+
     // Dynamic import stripe
     const Stripe = (await import('stripe')).default;
     const stripe = new Stripe(stripeSecretKey, { apiVersion: '2026-04-22.dahlia' as any });
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card', 'paypal'],
-      line_items: items.map((item: any) => ({
+      line_items: validatedItems.map((item) => ({
         price_data: {
           currency: 'eur',
           product_data: {
@@ -59,8 +91,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       customer_email: userEmail,
       metadata: {
         userId: userId || '',
-        recipeIds: items.map((i: any) => i.id).join(','),
-        recipeTitles: items.map((i: any) => i.title).join(', '),
+        recipeIds: validatedItems.map((i) => i.id).join(','),
+        recipeTitles: validatedItems.map((i) => i.title).join(', '),
       },
     });
 

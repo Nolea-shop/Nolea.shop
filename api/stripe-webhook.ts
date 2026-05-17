@@ -1,4 +1,15 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
+import admin from 'firebase-admin';
+
+// Initialize Firebase Admin
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}')),
+    projectId: 'gen-lang-client-0195318958'
+  });
+}
+
+const db = admin.firestore();
 
 // Disable body parsing for webhook - we need raw body
 export const config = {
@@ -57,8 +68,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const session = event.data.object as any;
       const customerEmail = session.customer_details?.email;
       const recipeTitles = session.metadata?.recipeTitles || 'deine Rezepte';
+      const userId = session.metadata?.userId;
+      const recipeIds = session.metadata?.recipeIds;
 
       console.log('Payment successful for session:', session.id);
+
+      // HIGH-END: Create verified order in Firestore via Admin SDK
+      await db.collection('orders').add({
+        stripeSessionId: session.id,
+        userId: userId || 'anonymous',
+        userEmail: customerEmail,
+        recipeIds: recipeIds ? recipeIds.split(',') : [],
+        recipeTitles: recipeTitles,
+        total: session.amount_total,
+        status: 'completed',
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      });
 
       // Send delivery email via Resend
       if (resendApiKey && customerEmail) {
