@@ -12,6 +12,16 @@ export function Navigation() {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [cartAnimate, setCartAnimate] = useState(false);
+
+  // Trigger animation when items change
+  useEffect(() => {
+    if (totalItems > 0) {
+      setCartAnimate(true);
+      const timer = setTimeout(() => setCartAnimate(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [totalItems]);
 
   const isAdmin = user?.email === 'julianlegendstar@gmail.com';
 
@@ -58,7 +68,12 @@ export function Navigation() {
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Cart Button */}
             <Link to="/cart" className="relative p-2 sm:p-2.5 text-[#2D2A26] hover:bg-[#F2EFE9] rounded-full transition-colors btn-press">
-              <ShoppingBasket size={22} strokeWidth={1.5} />
+              <motion.div
+                animate={cartAnimate ? { scale: [1, 1.2, 1] } : {}}
+                transition={{ duration: 0.3 }}
+              >
+                <ShoppingBasket size={22} strokeWidth={1.5} />
+              </motion.div>
               {totalItems > 0 && (
                 <motion.span 
                   initial={{ scale: 0 }}

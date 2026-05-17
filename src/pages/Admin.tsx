@@ -436,13 +436,15 @@ export function Admin() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6658] mb-3">Preis (in Cent)</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6658] mb-3">Preis (in €)</label>
                   <input 
                     id="input-price"
                     required
                     type="number" 
-                    value={newRecipe.price} 
-                    onChange={e => setNewRecipe({ ...newRecipe, price: Number(e.target.value) })}
+                    step="0.01"
+                    placeholder="29.99"
+                    value={newRecipe.price / 100 || ''} 
+                    onChange={e => setNewRecipe({ ...newRecipe, price: Math.round(Number(e.target.value) * 100) })}
                     className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#8A9A5B] transition-colors"
                   />
                 </div>
