@@ -15,34 +15,20 @@ export function Cart() {
   const navigate = useNavigate();
 
   const handleCheckout = async () => {
-    if (!user) {
-      toast.error('Bitte melde dich an, um fortzufahren.', {
-        icon: '👋',
-        style: {
-          background: '#FAF9F6',
-          color: '#2D2A26',
-          border: '1px solid #E5E2D9',
-          borderRadius: '1rem',
-          padding: '12px 20px',
-        },
-      });
-      return;
-    }
-
     setIsCheckingOut(true);
     try {
       // Debug-Logging
-      console.log('[Checkout] Starte Checkout für User:', user.uid, user.email);
+      console.log('[Checkout] Starte Checkout für User:', user?.uid ?? 'Gast', user?.email ?? 'Gast');
       console.log('[Checkout] Warenkorb Artikel:', cart.length);
-      console.log('[Checkout] Sende Daten:', { items: cart, userId: user.uid, userEmail: user.email });
+      console.log('[Checkout] Sende Daten:', { items: cart, userId: user?.uid ?? null, userEmail: user?.email ?? null });
 
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: cart,
-          userId: user.uid,
-          userEmail: user.email,
+          userId: user?.uid ?? null,
+          userEmail: user?.email ?? null,
         }),
       });
 
@@ -60,7 +46,7 @@ export function Cart() {
       if (url) {
         window.location.href = url;
       }
-      console.log("[Checkout] Weiterleitung zu Stripe erfolgreich");
+      console.log('[Checkout] Weiterleitung zu Stripe erfolgreich');
     } catch (error: any) {
       console.error('[Checkout] Fehler:', error);
       toast.error(`Checkout fehlgeschlagen: ${error.message || 'Unbekannter Fehler'}`, {
@@ -228,7 +214,7 @@ export function Cart() {
           </div>
         </div>
         
-        {/* Not logged in warning */}
+        {/* Guest checkout notice */}
         {!user && (
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
@@ -237,7 +223,7 @@ export function Cart() {
             className="mt-6 p-4 bg-[#F2EFE9] rounded-xl border border-[#E5E2D9] text-center"
           >
             <p className="text-sm text-[#6B6658]">
-              <span className="text-[#8A9A5B] font-medium">💡 Tipp:</span> Melde dich an, um deine Einkäufe zu speichern und schneller zur Kasse zu gehen.
+              <span className="text-[#8A9A5B] font-medium">✨ Gast-Checkout:</span> Du kannst auch ohne Anmeldung direkt per Stripe bezahlen. Nach erfolgreicher Zahlung bekommst du deine Downloads per E-Mail zugesandt.
             </p>
           </motion.div>
         )}
