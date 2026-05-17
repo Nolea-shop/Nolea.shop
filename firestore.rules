@@ -83,8 +83,8 @@ service cloud.firestore {
     // Orders: Owner and Admin can read. NO ONE can create/update directly anymore!
     // High-End Security: Orders are only created by the System (Admin SDK) via Webhook.
     match /orders/{orderId} {
-      allow read: if isOwner(existing().userId) || isAdmin();
-      allow create, update, delete: if false; 
+      allow read: if isOwner(resource.data.userId) || isAdmin();
+      allow create, update, delete: if false;
     }
 
     // Users: Owner and Admin can read, Owner can create/update their own profile
