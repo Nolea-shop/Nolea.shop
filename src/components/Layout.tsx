@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingBasket, User, LogOut, ShieldCheck, Menu, X, Search, Home, Store } from 'lucide-react';
+import { ShoppingBasket, User, LogOut, ShieldCheck, Menu, X, Search, Home, Store, Info } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { auth, signInWithGoogle } from '../lib/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -52,14 +52,12 @@ export function Navigation() {
             >
               Shop
             </Link>
-            {user && (
-              <Link 
-                to="/admin" 
-                className={`flex items-center gap-1 font-sans text-xs font-bold uppercase tracking-widest ${isAdmin ? 'text-[#8A9A5B]' : 'text-[#6B6658]'} px-2 py-2`}
-              >
-                {isAdmin ? <ShieldCheck size={14} /> : <User size={14} />} {isAdmin ? 'Admin' : 'Creator Hub'}
-              </Link>
-            )}
+            <Link 
+              to="/impressum"
+              className="flex items-center gap-1 font-sans text-xs font-bold uppercase tracking-widest text-[#6B6658] px-2 py-2 hover:text-[#2D2A26]"
+            >
+              <Info size={14} /> Impressum
+            </Link>
           </div>
 
           {/* Right Side - Cart & User */}
@@ -201,17 +199,17 @@ export function Navigation() {
                         </span>
                       )}
                     </Link>
-                    {user && (
-                      <Link 
-                        to="/admin" 
-                        className="flex items-center gap-3 px-4 py-4 text-[#8A9A5B] hover:bg-[#F2EFE9] rounded-xl transition-colors"
-                      >
-                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                        </svg>
-                        <span className="font-medium">{isAdmin ? 'Admin Panel' : 'Creator Hub'}</span>
-                      </Link>
-                    )}
+                    <Link 
+                      to="/impressum"
+                      className="flex items-center gap-3 px-4 py-4 text-[#2D2A26] hover:bg-[#F2EFE9] rounded-xl transition-colors"
+                    >
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                      </svg>
+                      <span className="font-medium">Impressum</span>
+                    </Link>
                   </nav>
                 </div>
 
@@ -283,13 +281,11 @@ export function Navigation() {
           </Link>
           
           <Link 
-            to="/admin" 
-            className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-colors ${
-              location.pathname === '/admin' ? 'text-[#8A9A5B]' : 'text-[#6B6658]'
-            }`}
+            to="/impressum"
+            className="flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-colors"
           >
-            <User size={22} strokeWidth={1.5} />
-            <span className="text-[10px] font-medium">{isAdmin ? 'Admin' : 'Creator'}</span>
+            <Info size={22} strokeWidth={1.5} />
+            <span className="text-[10px] font-medium">Impressum</span>
           </Link>
         </div>
       </motion.div>
