@@ -41,6 +41,24 @@ export async function getAdminRecipes(): Promise<Recipe[]> {
   }
 }
 
+export async function getCreatorRecipes(userId: string): Promise<Recipe[]> {
+  try {
+    const q = query(
+      collection(db, RECIPES_COLLECTION), 
+      where('authorId', '==', userId),
+      orderBy('createdAt', 'desc')
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Recipe[];
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, `${RECIPES_COLLECTION}?authorId=${userId}`);
+    return [];
+  }
+}
+
 export async function createRecipe(recipe: Omit<Recipe, 'id' | 'createdAt'>) {
   try {
     // Race: addDoc vs. 10-Second timeout to prevent hanging

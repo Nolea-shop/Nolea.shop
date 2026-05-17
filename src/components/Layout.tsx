@@ -58,12 +58,12 @@ export function Navigation() {
             >
               Impressum
             </Link>
-            {isAdmin && (
+            {user && (
               <Link 
                 to="/admin" 
-                className="flex items-center gap-1 font-sans text-xs font-bold uppercase tracking-widest text-[#8A9A5B] px-2 py-2"
+                className={`flex items-center gap-1 font-sans text-xs font-bold uppercase tracking-widest ${isAdmin ? 'text-[#8A9A5B]' : 'text-[#6B6658]'} px-2 py-2`}
               >
-                <ShieldCheck size={14} /> Admin
+                {isAdmin ? <ShieldCheck size={14} /> : <User size={14} />} {isAdmin ? 'Admin' : 'Creator Hub'}
               </Link>
             )}
           </div>
@@ -220,16 +220,15 @@ export function Navigation() {
                       </svg>
                       <span className="font-medium">Impressum</span>
                     </Link>
-                    {isAdmin && (
+                    {user && (
                       <Link 
                         to="/admin" 
                         className="flex items-center gap-3 px-4 py-4 text-[#8A9A5B] hover:bg-[#F2EFE9] rounded-xl transition-colors"
                       >
                         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="3"/>
-                          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                         </svg>
-                        <span className="font-medium">Admin</span>
+                        <span className="font-medium">{isAdmin ? 'Admin Panel' : 'Creator Hub'}</span>
                       </Link>
                     )}
                   </nav>
@@ -302,25 +301,15 @@ export function Navigation() {
             <span className="text-[10px] font-medium">Warenkorb</span>
           </Link>
           
-          {user ? (
-            <Link 
-              to="/admin" 
-              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-colors ${
-                location.pathname === '/admin' ? 'text-[#8A9A5B]' : 'text-[#6B6658]'
-              }`}
-            >
-              <User size={22} strokeWidth={1.5} />
-              <span className="text-[10px] font-medium">Profil</span>
-            </Link>
-          ) : (
-            <button 
-              onClick={signInWithGoogle}
-              className="flex flex-col items-center gap-1 px-4 py-2 rounded-xl text-[#6B6658] transition-colors"
-            >
-              <User size={22} strokeWidth={1.5} />
-              <span className="text-[10px] font-medium">Login</span>
-            </button>
-          )}
+          <Link 
+            to="/admin" 
+            className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-colors ${
+              location.pathname === '/admin' ? 'text-[#8A9A5B]' : 'text-[#6B6658]'
+            }`}
+          >
+            <User size={22} strokeWidth={1.5} />
+            <span className="text-[10px] font-medium">{isAdmin ? 'Admin' : 'Creator'}</span>
+          </Link>
         </div>
       </motion.div>
     </>

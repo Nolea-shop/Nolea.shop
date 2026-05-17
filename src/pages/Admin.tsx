@@ -3,8 +3,8 @@ import { motion } from 'motion/react';
 import { auth } from '../lib/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { getAllRecipes, createRecipe, deleteRecipe, updateRecipe, toggleRecipeOnline, getAdminRecipes } from '../services/recipeService';
-import { getAllOrders } from '../services/orderService';
+import { getAllRecipes, createRecipe, deleteRecipe, updateRecipe, toggleRecipeOnline, getAdminRecipes, getCreatorRecipes } from '../services/recipeService';
+import { getAllOrders, getUserOrders } from '../services/orderService';
 import { Recipe } from '../types';
 import { Plus, Trash2, LayoutDashboard, Utensils, ShoppingBag, LogOut, ShieldAlert, LogIn, Settings, CheckCircle2, XCircle, Edit3, Eye, EyeOff, X, ExternalLink, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -40,12 +40,15 @@ export function Admin() {
   const [publishStage, setPublishStage] = useState('');
 
   const isAdmin = user?.email === 'julianlegendstar@gmail.com';
+  const isCreator = !!user;
 
   const loadData = async () => {
+    if (!user) return;
     try {
+      const isActualAdmin = user.email === 'julianlegendstar@gmail.com';
       const [r, o, config] = await Promise.all([
-        getAdminRecipes(), 
-        getAllOrders(),
+        isActualAdmin ? getAdminRecipes() : getCreatorRecipes(user.uid), 
+        isActualAdmin ? getAllOrders() : getUserOrders(user.uid),
         fetch('/api/admin/config-status').then(res => res.json())
       ]);
       setRecipes(r);
@@ -58,10 +61,10 @@ export function Admin() {
   };
 
   useEffect(() => {
-    if (isAdmin) {
+    if (user) {
       loadData().finally(() => setLoading(false));
     }
-  }, [isAdmin]);
+  }, [user]);
 
   const handleSimulatePurchase = async () => {
     if (!simEmail) return toast.error('Bitte E-Mail angeben');
@@ -104,7 +107,13 @@ export function Admin() {
       setPublishStage('Produkt wird erstellt...');
 
       // Schritt 2: Produkt erstellen
-      await createRecipe(newRecipe);
+      await createRecipe({
+        ...newRecipe,
+        authorId: user.uid,
+        authorEmail: user.email || '',
+        isUserGenerated: true,
+        isOnline: isAdmin ? newRecipe.isOnline : false // Creators start offline (draft)
+      });
       setPublishProgress(60);
       setPublishStage('Assets werden verarbeitet...');
 
@@ -200,37 +209,26 @@ export function Admin() {
     );
   }
 
-  if (!isAdmin) {
+  if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#FAF9F6] p-6 text-center">
         <div className="w-16 h-16 bg-[#F2EFE9] text-[#2D2A26] rounded-full flex items-center justify-center mb-6">
           <ShieldAlert size={32} strokeWidth={1.5} />
         </div>
-        <h1 className="text-3xl font-serif italic text-[#2D2A26] mb-4">Zugriff Verweigert</h1>
+        <h1 className="text-3xl font-serif italic text-[#2D2A26] mb-4">Creator Hub</h1>
         <p className="text-[#6B6658] mb-8 max-w-sm text-sm">
-          {user 
-            ? `Eingeloggt als ${user.email}. Dieses Konto hat keine Admin-Rechte.`
-            : 'Bitte logge dich mit einem autorisierten Google-Konto ein.'}
+          Logge dich ein, um deine eigenen Guides hochzuladen und 90% des Umsatzes zu behalten.
         </p>
         
-        {user ? (
-          <button 
-            onClick={() => auth.signOut()}
-            className="bg-[#2D2A26] text-white px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-black transition-all flex items-center gap-2"
-          >
-            <LogOut size={16} /> Abmelden
-          </button>
-        ) : (
-          <button 
-            onClick={() => {
-              const provider = new GoogleAuthProvider();
-              signInWithPopup(auth, provider);
-            }}
-            className="bg-[#8A9A5B] text-white px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#6B7A46] transition-all flex items-center gap-2"
-          >
-            <LogIn size={16} /> Mit Google Einloggen
-          </button>
-        )}
+        <button 
+          onClick={() => {
+            const provider = new GoogleAuthProvider();
+            signInWithPopup(auth, provider);
+          }}
+          className="bg-[#8A9A5B] text-white px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#6B7A46] transition-all flex items-center gap-2"
+        >
+          <LogIn size={16} /> Mit Google Einloggen
+        </button>
       </div>
     );
   }
@@ -253,29 +251,31 @@ export function Admin() {
     <div className="min-h-screen bg-[#FAF9F6] flex" id="admin-panel">
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-[#E5E2D9] p-8 flex flex-col gap-10">
-        <div className="text-xl font-serif font-bold italic tracking-tight text-[#2D2A26]">Admin Panel</div>
+        <div className="text-xl font-serif font-bold italic tracking-tight text-[#2D2A26]">{isAdmin ? 'Admin Panel' : 'Creator Hub'}</div>
         <nav className="flex flex-col gap-2" id="admin-nav">
           <button 
             data-testid="nav-recipes"
             onClick={() => setActiveTab('recipes')}
             className={`flex items-center gap-3 p-3 rounded-xl transition-all text-xs font-bold uppercase tracking-wider ${activeTab === 'recipes' ? 'bg-[#8A9A5B] text-white shadow-sm' : 'text-[#6B6658] hover:bg-[#F2EFE9]'}`}
           >
-            <Utensils size={18} strokeWidth={1.5} /> Produkte
+            <Utensils size={18} strokeWidth={1.5} /> {isAdmin ? 'Produkte' : 'Meine Guides'}
           </button>
           <button 
             data-testid="nav-orders"
             onClick={() => setActiveTab('orders')}
             className={`flex items-center gap-3 p-3 rounded-xl transition-all text-xs font-bold uppercase tracking-wider ${activeTab === 'orders' ? 'bg-[#8A9A5B] text-white shadow-sm' : 'text-[#6B6658] hover:bg-[#F2EFE9]'}`}
           >
-            <ShoppingBag size={18} strokeWidth={1.5} /> Bestellungen
+            <ShoppingBag size={18} strokeWidth={1.5} /> {isAdmin ? 'Bestellungen' : 'Meine Verkäufe'}
           </button>
-          <button 
-            data-testid="nav-system"
-            onClick={() => setActiveTab('system')}
-            className={`flex items-center gap-3 p-3 rounded-xl transition-all text-xs font-bold uppercase tracking-wider ${activeTab === 'system' ? 'bg-[#8A9A5B] text-white shadow-sm' : 'text-[#6B6658] hover:bg-[#F2EFE9]'}`}
-          >
-            <Settings size={18} strokeWidth={1.5} /> System / AI
-          </button>
+          {isAdmin && (
+            <button 
+              data-testid="nav-system"
+              onClick={() => setActiveTab('system')}
+              className={`flex items-center gap-3 p-3 rounded-xl transition-all text-xs font-bold uppercase tracking-wider ${activeTab === 'system' ? 'bg-[#8A9A5B] text-white shadow-sm' : 'text-[#6B6658] hover:bg-[#F2EFE9]'}`}
+            >
+              <Settings size={18} strokeWidth={1.5} /> System / AI
+            </button>
+          )}
         </nav>
       </aside>
 
@@ -298,15 +298,15 @@ export function Admin() {
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
               <div className="bg-white rounded-2xl p-6 border border-[#E5E2D9]">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-[#6B6658] mb-2">Gesamt</div>
+                <div className="text-[10px] font-bold uppercase tracking-widest text-[#6B6658] mb-2">{isAdmin ? 'Gesamt' : 'Meine Guides'}</div>
                 <div className="text-3xl font-serif italic text-[#2D2A26]">{recipes.length}</div>
               </div>
               <div className="bg-white rounded-2xl p-6 border border-[#E5E2D9]">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-green-600 mb-2">Online</div>
+                <div className="text-[10px] font-bold uppercase tracking-widest text-green-600 mb-2">Live</div>
                 <div className="text-3xl font-serif italic text-green-600">{onlineCount}</div>
               </div>
               <div className="bg-white rounded-2xl p-6 border border-[#E5E2D9]">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-[#6B6658] mb-2">Offline</div>
+                <div className="text-[10px] font-bold uppercase tracking-widest text-[#6B6658] mb-2">{isAdmin ? 'Offline' : 'Entwürfe'}</div>
                 <div className="text-3xl font-serif italic text-[#6B6658]">{offlineCount}</div>
               </div>
             </div>
