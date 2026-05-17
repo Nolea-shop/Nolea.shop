@@ -52,12 +52,6 @@ export function Navigation() {
             >
               Shop
             </Link>
-            <Link 
-              to="/impressum"
-              className="flex items-center gap-1 font-sans text-xs font-bold uppercase tracking-widest text-[#6B6658] px-2 py-2 hover:text-[#2D2A26]"
-            >
-              <Info size={14} /> Impressum
-            </Link>
           </div>
 
           {/* Right Side - Cart & User */}
