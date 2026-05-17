@@ -81,6 +81,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         recipeIds: recipeIds ? recipeIds.split(',') : [],
         recipeTitles: recipeTitles,
         total: session.amount_total,
+        // High-End: Record commission details
+        commissionCents: Math.round(session.amount_total * 0.10),
+        payoutCents: session.amount_total - Math.round(session.amount_total * 0.10),
+        authorIds: session.metadata?.authorIds ? session.metadata.authorIds.split(',') : [],
         status: 'completed',
         createdAt: admin.firestore.FieldValue.serverTimestamp()
       });

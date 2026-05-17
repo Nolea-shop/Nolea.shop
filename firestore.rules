@@ -45,7 +45,8 @@ service cloud.firestore {
              data.description is string && data.description.size() <= 2000 &&
              data.price is number && data.price >= 0 &&
              data.imageUrl is string &&
-             data.createdAt is timestamp;
+             data.createdAt is timestamp &&
+             (data.isUserGenerated != true || (data.authorId is string && data.authorEmail is string));
     }
 
     // Validate Order
@@ -68,10 +69,15 @@ service cloud.firestore {
     }
 
     // Recipes: Anyone can read Online recipes, only Admin can write
+    // UPDATE: Users can create recipes (if isUserGenerated is true)
     match /recipes/{recipeId} {
-      allow read: if resource.data.isOnline == true || isAdmin();
-      allow create, update: if isAdmin() && isValidRecipe(incoming());
-      allow delete: if isAdmin();
+      allow read: if resource.data.isOnline == true || isAdmin() || resource.data.authorId == request.auth.uid;
+      allow create: if isSignedIn() && (
+        isAdmin() || 
+        (incoming().isUserGenerated == true && incoming().authorId == request.auth.uid)
+      ) && isValidRecipe(incoming());
+      allow update: if (isAdmin() || (resource.data.authorId == request.auth.uid)) && isValidRecipe(incoming());
+      allow delete: if isAdmin() || resource.data.authorId == request.auth.uid;
     }
 
     // Orders: Owner and Admin can read. NO ONE can create/update directly anymore!

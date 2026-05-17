@@ -8,6 +8,9 @@ export interface Recipe {
   contentUrl?: string; // only for owner/admin
   createdAt: any;
   isOnline: boolean; // controls visibility in shop
+  authorId?: string; // UID of the creator
+  authorEmail?: string;
+  isUserGenerated?: boolean;
 }
 
 export interface CartItem extends Recipe {
@@ -17,6 +20,7 @@ export interface CartItem extends Recipe {
 export interface UserProfile {
   uid: string;
   email: string;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'creator';
   purchasedRecipeIds: string[];
+  stripeAccountId?: string; // for payouts
 }

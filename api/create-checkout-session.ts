@@ -93,6 +93,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         userId: userId || '',
         recipeIds: validatedItems.map((i) => i.id).join(','),
         recipeTitles: validatedItems.map((i) => i.title).join(', '),
+        // High-End: Pass author info for split payments
+        authorIds: validatedItems.map(i => i.authorId || 'admin').join(',')
       },
     });
 
