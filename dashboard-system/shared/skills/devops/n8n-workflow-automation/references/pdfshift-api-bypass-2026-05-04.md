@@ -1,1 +1,0 @@
-{'method': 'POST', 'url': 'https://sk_e58378531df9040ea6aa44a42f8051dd6ccba7fc:@api.pdfshift.io/v3/convert/pdf', 'authentication': 'none', 'sendBody': True, 'specifyBody': 'json', 'jsonBody': '={{ JSON.stringify({ source: $json.html }) }}', 'options': {'response': {'response': {'responseFormat': 'file', 'outputPropertyName': 'document'}}}}

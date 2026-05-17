@@ -1,9 +1,0 @@
-{
-  "last_report_path": "/home/damia/.hermes/logs/curator/20260514-172750",
-  "last_run_at": "2026-05-14T17:27:50.665958+00:00",
-  "last_run_duration_seconds": 10.017856,
-  "last_run_summary": "auto: no changes; llm: API call failed after 3 retries: HTTP 429: Gemini HTTP 429 (RESOURCE_EXHAUSTED): You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs…",
-  "last_run_summary_shown_at": "2026-05-14T17:27:50.665958+00:00",
-  "paused": false,
-  "run_count": 3
-}

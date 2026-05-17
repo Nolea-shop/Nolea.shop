@@ -1,9 +1,0 @@
-{
-  "_comment": "Konfiguration für den Dashboard-Server — optional",
-  "server_name": "julian-server",
-  "agent_name": "Jeff",
-  "port": 8383,
-  "tailscale_ip": "100.x.x.x",
-  "n8n_base": "http://localhost:5678",
-  "n8n_workflow_id": "1zHhhqvq6dZZiqcc"
-}
