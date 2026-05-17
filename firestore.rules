@@ -67,9 +67,9 @@ service cloud.firestore {
              data.updatedAt is timestamp;
     }
 
-    // Recipes: Anyone can read, only Admin can write
+    // Recipes: Anyone can read Online recipes, only Admin can write
     match /recipes/{recipeId} {
-      allow read: if true;
+      allow read: if resource.data.isOnline == true || isAdmin();
       allow create, update: if isAdmin() && isValidRecipe(incoming());
       allow delete: if isAdmin();
     }

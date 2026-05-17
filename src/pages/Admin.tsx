@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { auth } from '../lib/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { getAllRecipes, createRecipe, deleteRecipe, updateRecipe, toggleRecipeOnline } from '../services/recipeService';
+import { getAllRecipes, createRecipe, deleteRecipe, updateRecipe, toggleRecipeOnline, getAdminRecipes } from '../services/recipeService';
 import { getAllOrders } from '../services/orderService';
 import { Recipe } from '../types';
 import { Plus, Trash2, LayoutDashboard, Utensils, ShoppingBag, LogOut, ShieldAlert, LogIn, Settings, CheckCircle2, XCircle, Edit3, Eye, EyeOff, X, ExternalLink, Save } from 'lucide-react';
@@ -44,7 +44,7 @@ export function Admin() {
   const loadData = async () => {
     try {
       const [r, o, config] = await Promise.all([
-        getAllRecipes(), 
+        getAdminRecipes(), 
         getAllOrders(),
         fetch('/api/admin/config-status').then(res => res.json())
       ]);

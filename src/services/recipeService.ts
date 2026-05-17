@@ -1,4 +1,4 @@
-import { collection, query, orderBy, getDocs, addDoc, serverTimestamp, deleteDoc, doc, updateDoc, Timestamp } from 'firebase/firestore';
+import { collection, query, orderBy, getDocs, addDoc, serverTimestamp, deleteDoc, doc, updateDoc, Timestamp, where } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { Recipe } from '../types';
 
@@ -10,6 +10,24 @@ const timeout = (ms: number) => new Promise((_, reject) =>
 );
 
 export async function getAllRecipes(): Promise<Recipe[]> {
+  try {
+    const q = query(
+      collection(db, RECIPES_COLLECTION), 
+      where('isOnline', '==', true),
+      orderBy('createdAt', 'desc')
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Recipe[];
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, RECIPES_COLLECTION);
+    return [];
+  }
+}
+
+export async function getAdminRecipes(): Promise<Recipe[]> {
   try {
     const q = query(collection(db, RECIPES_COLLECTION), orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
