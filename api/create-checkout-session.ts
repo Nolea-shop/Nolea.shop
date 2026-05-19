@@ -2,9 +2,20 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import admin from 'firebase-admin';
 
 // Initialize Firebase Admin if not already initialized
+function parseFirebaseKey(raw: string): any {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    // Vercel double-escapes the private_key newlines: try to unescape
+    const unescaped = raw.replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+    return JSON.parse(unescaped);
+  }
+}
+
 if (!admin.apps.length) {
+  const raw = process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}';
   admin.initializeApp({
-    credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}')),
+    credential: admin.credential.cert(parseFirebaseKey(raw)),
     projectId: 'gen-lang-client-0195318958'
   });
 }
