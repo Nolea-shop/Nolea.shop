@@ -1,0 +1,62 @@
+const handleAddRecipe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsPublishing(true);
+    setPublishProgress(0);
+    setPublishStage('Validierung...');
+
+    try {
+      // Schritt 1: Validierung (simuliert)
+      await new Promise(resolve => setTimeout(resolve, 300));
+      setPublishProgress(20);
+      setPublishStage('Produkt wird erstellt...');
+
+      // Schritt 2: Produkt erstellen
+      await createRecipe(newRecipe);
+      setPublishProgress(60);
+      setPublishStage('Assets werden verarbeitet...');
+
+      // Schritt 3: Verarbeitung (simuliert)
+      await new Promise(resolve => setTimeout(resolve, 400));
+      setPublishProgress(80);
+      setPublishStage('Finalisiere...');
+
+      // Erfolg
+      toast.success('Produkt hinzugefügt und veröffentlicht!', {
+        icon: '✅',
+        duration: 3000,
+      });
+
+      setNewRecipe({ title: '', description: '', price: 0, imageUrl: '', category: 'Lifestyle', contentUrl: '', isOnline: true });
+      setPublishProgress(100);
+      setPublishStage('Abgeschlossen');
+
+      await loadData();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Fortschritt zurücksetzen nach kurzer Verzögerung
+      setTimeout(() => {
+        setPublishProgress(0);
+        setPublishStage('');
+        setIsPublishing(false);
+      }, 2000);
+
+    } catch (error: any) {
+      console.error('Save error details:', error);
+      // States SOFORT zurücksetzen - kein await dazwischen
+      setIsPublishing(false);
+      setPublishProgress(0);
+      setPublishStage('');
+      
+      const errorMessage = error?.message || String(error);
+      const displayMsg = errorMessage?.includes('Timeout')
+        ? 'Zeitüberschreitung - Firestore nicht erreichbar (Offline/Regeln?)'
+        : errorMessage?.includes('permission') || errorMessage?.includes('berechtigung')
+        ? 'Keine Berechtigung - Admin-Rechte in Firestore prüfen'
+        : errorMessage || 'Unbekannter Fehler';
+      
+      toast.error(`Fehler: ${displayMsg.substring(0, 150)}`, { 
+        duration: 6000,
+        icon: '⚠️'
+      });
+    }
+  };
