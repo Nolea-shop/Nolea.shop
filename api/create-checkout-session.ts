@@ -2,23 +2,32 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import admin from 'firebase-admin';
 
 // Initialize Firebase Admin if not already initialized
-function parseFirebaseKey(raw: string): any {
+function initFirebase() {
+  if (admin.apps.length) return;
+  // Try base64-encoded key first (avoids Vercel newline escaping issues)
+  const b64Key = process.env.FIREBASE_SERVICE_ACCOUNT_KEY_B64 || process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '';
   try {
-    return JSON.parse(raw);
+    const json = Buffer.from(b64Key, 'base64').toString('utf8');
+    admin.initializeApp({
+      credential: admin.credential.cert(JSON.parse(json)),
+      projectId: 'gen-lang-client-0195318958'
+    });
+    return;
   } catch {
-    // Vercel double-escapes the private_key newlines: try to unescape
-    const unescaped = raw.replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
-    return JSON.parse(unescaped);
+    // Fallback: try direct JSON parse
+    try {
+      admin.initializeApp({
+        credential: admin.credential.cert(JSON.parse(b64Key)),
+        projectId: 'gen-lang-client-0195318958'
+      });
+      return;
+    } catch {
+      throw new Error('Failed to initialize Firebase: invalid FIREBASE_SERVICE_ACCOUNT_KEY_B64');
+    }
   }
 }
 
-if (!admin.apps.length) {
-  const raw = process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}';
-  admin.initializeApp({
-    credential: admin.credential.cert(parseFirebaseKey(raw)),
-    projectId: 'gen-lang-client-0195318958'
-  });
-}
+initFirebase();
 
 const db = admin.firestore();
 
