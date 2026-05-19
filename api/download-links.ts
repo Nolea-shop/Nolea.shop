@@ -34,20 +34,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-    // Get contentUrls from checkout metadata
+    // Get contentUrls from checkout metadata — may be full URLs (Firebase/Supabase) or plain filenames
     const contentUrls = (session as any).metadata?.contentUrls || '';
-    const filenames = contentUrls.split(',').filter((f: string) => f.trim());
+    const filenames = contentUrls.split(',').map((f: string) => f.trim()).filter(Boolean);
+
+    // Extract just the filename from any URL format
+    function extractFilename(input: string): string | null {
+      // Strip query params first
+      const noQuery = input.split('?')[0];
+      // Decode URL-encoded path segments (%2F → /)
+      const decoded = decodeURIComponent(noQuery);
+      // Take last path segment
+      const lastSegment = decoded.split('/').pop() || '';
+      if (lastSegment.toLowerCase().endsWith('.pdf')) {
+        return lastSegment;
+      }
+      return null;
+    }
 
     // Supabase Storage Bucket (öffentlich)
     const base = 'https://mmlqyzcowrckhtaaqzvz.supabase.co';
     const bucket = 'pdfs';
 
-    // Build direct download links to Supabase Storage
-    const downloadLinks = filenames.map((filename: string) => ({
-      title: filename.trim().replace('.pdf', ''),
-      url: `${base}/storage/v1/object/public/${bucket}/${encodeURIComponent(filename.trim())}`,
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-    }));
+    // Build direct download links
+    const downloadLinks: { url: string; title: string; expiresAt: string }[] = [];
+    for (const raw of filenames) {
+      const fn = extractFilename(raw);
+      if (!fn) continue;
+      downloadLinks.push({
+        title: fn.replace('.pdf', ''),
+        url: `${base}/storage/v1/object/public/${bucket}/${encodeURIComponent(fn)}`,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      });
+    }
 
     return res.status(200).json({
       success: true,
