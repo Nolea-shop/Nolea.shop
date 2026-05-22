@@ -36,10 +36,10 @@ export function Success() {
         if (res.ok) {
           const data = await res.json();
           if (data.downloadLinks && data.downloadLinks.length > 0) {
-            // Links mit gültigen Supabase-URLs bauen
+            // Nutze die von der API bereits gelieferten signierten URLs direkt
             const links = data.downloadLinks.map((l: any) => ({
               title: l.title,
-              url: getPdfUrl(l.title + '.pdf'),
+              url: l.url,
             }));
             setDownloadLinks(links);
             setLoading(false);
