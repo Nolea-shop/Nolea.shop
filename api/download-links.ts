@@ -1,8 +1,9 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 
 /**
- * Returns download links for a given Stripe session.
- * Used by the Success page to show PDF download links after purchase.
+ * Returns signed download links for a given Stripe session.
+ * Uses Supabase signed URLs (7-day expiry) instead of public URLs.
+ * Only accessible after successful payment (session_id validated against Stripe).
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS headers
@@ -24,27 +25,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+  const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+  const supabaseUrl = process.env.SUPABASE_URL || '';
   if (!stripeSecretKey) {
     return res.status(500).json({ error: 'Stripe not configured' });
+  }
+  if (!supabaseSecretKey || !supabaseUrl) {
+    return res.status(500).json({ error: 'Supabase not configured' });
   }
 
   try {
     const Stripe = (await import('stripe')).default;
     const stripe = new Stripe(stripeSecretKey, { apiVersion: '2026-04-22.dahlia' as any });
 
+    // 1. Validate session with Stripe
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-    // Get contentUrls from checkout metadata — may be full URLs (Firebase/Supabase) or plain filenames
+    // Only serve links for completed/paid sessions
+    const paymentStatus = (session as any).payment_status;
+    if (paymentStatus !== 'paid') {
+      return res.status(403).json({ error: 'Payment not completed' });
+    }
+
+    // 2. Get filenames from checkout metadata
     const contentUrls = (session as any).metadata?.contentUrls || '';
     const filenames = contentUrls.split(',').map((f: string) => f.trim()).filter(Boolean);
 
-    // Extract just the filename from any URL format
     function extractFilename(input: string): string | null {
-      // Strip query params first
       const noQuery = input.split('?')[0];
-      // Decode URL-encoded path segments (%2F → /)
       const decoded = decodeURIComponent(noQuery);
-      // Take last path segment
       const lastSegment = decoded.split('/').pop() || '';
       if (lastSegment.toLowerCase().endsWith('.pdf')) {
         return lastSegment;
@@ -52,20 +61,47 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return null;
     }
 
-    // Supabase Storage Bucket (öffentlich)
-    const base = 'https://mmlqyzcowrckhtaaqzvz.supabase.co';
-    const bucket = 'pdfs';
+    // 3. Generate signed URLs via Supabase Storage API
+    const EXPIRY_SECONDS = 7 * 24 * 60 * 60; // 7 Tage
 
-    // Build direct download links
+    async function generateSignedUrl(filename: string): Promise<string> {
+      const resp = await fetch(
+        `${supabaseUrl}/storage/v1/object/sign/pdfs/${encodeURIComponent(filename)}`,
+        {
+          method: 'POST',
+          headers: {
+            'apikey': supabaseSecretKey,
+            'Authorization': `Bearer ${supabaseSecretKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ expiresIn: EXPIRY_SECONDS }),
+        }
+      );
+      if (!resp.ok) {
+        const err = await resp.text();
+        console.error(`Supabase signed URL error for ${filename}:`, err);
+        throw new Error(`Failed to generate signed URL for ${filename}`);
+      }
+      const data = await resp.json() as { signedURL: string };
+      // signedURL is relative: /object/sign/pdfs/... → build full URL
+      return `${supabaseUrl}${data.signedURL}`;
+    }
+
+    // 4. Build signed download links
     const downloadLinks: { url: string; title: string; expiresAt: string }[] = [];
     for (const raw of filenames) {
       const fn = extractFilename(raw);
       if (!fn) continue;
-      downloadLinks.push({
-        title: fn.replace('.pdf', ''),
-        url: `${base}/storage/v1/object/public/${bucket}/${encodeURIComponent(fn)}`,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-      });
+      try {
+        const signedUrl = await generateSignedUrl(fn);
+        downloadLinks.push({
+          title: fn.replace('.pdf', ''),
+          url: signedUrl,
+          expiresAt: new Date(Date.now() + EXPIRY_SECONDS * 1000).toISOString(),
+        });
+      } catch (err: any) {
+        console.error(`Error generating signed URL for ${fn}:`, err.message);
+      }
     }
 
     return res.status(200).json({
