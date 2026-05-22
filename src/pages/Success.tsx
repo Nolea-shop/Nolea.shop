@@ -8,13 +8,6 @@ export function Success() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // PDF Download-URL über Supabase Storage bauen
-  const getPdfUrl = (filename: string): string => {
-    const base = 'https://mmlqyzcowrckhtaaqzvz.supabase.co';
-    const bucket = 'pdfs';
-    return `${base}/storage/v1/object/public/${bucket}/${encodeURIComponent(filename)}`;
-  };
-
   useEffect(() => {
     // Session-ID aus URL lesen
     const params = new URLSearchParams(window.location.search);

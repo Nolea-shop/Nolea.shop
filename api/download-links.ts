@@ -17,7 +17,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!sessionId) return res.status(400).json({ error: 'session_id is required' });
 
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-  const supabaseUrl = process.env.SUPABASE_URL || '';
   if (!stripeSecretKey) return res.status(500).json({ error: 'Stripe not configured' });
 
   try {
@@ -38,7 +37,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const EXPIRY = 7 * 24 * 60 * 60; // 7 Tage
-    const bucket = 'pdfs';
     const downloadLinks: { url: string; title: string; expiresAt: string }[] = [];
 
     for (const raw of filenames) {
@@ -46,7 +44,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!fn) continue;
       downloadLinks.push({
         title: fn.replace('.pdf', ''),
-        url: `${supabaseUrl}/storage/v1/object/public/${bucket}/${encodeURIComponent(fn)}`,
+        url: `/api/download?session_id=${encodeURIComponent(sessionId)}&product=${encodeURIComponent(fn)}`,
         expiresAt: new Date(Date.now() + EXPIRY * 1000).toISOString(),
       });
     }
