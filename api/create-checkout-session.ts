@@ -116,7 +116,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           currency: 'eur',
           product_data: {
             name: item.title,
-            images: item.imageUrl ? [item.imageUrl] : [],
+            images: item.imageUrl && item.imageUrl.startsWith('http') ? [item.imageUrl] : [],
           },
           unit_amount: Math.round(item.price), // Price in cents — from DB
         },
