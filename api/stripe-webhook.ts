@@ -101,7 +101,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-              from: 'Nolea Studio <onboarding@resend.dev>',
+              from: 'Nolea Studio <noreply@nolea.shop>',
               to: customerEmail,
               subject: 'Vielen Dank! Deine Nolea Produkte sind da',
               html: `

@@ -103,7 +103,7 @@ app.post('/api/admin/simulate-order', async (req, res) => {
   if (resend && customerEmail) {
     try {
       await resend.emails.send({
-        from: 'Nolea Test <onboarding@resend.dev>',
+        from: 'Nolea Test <noreply@nolea.shop>',
         to: customerEmail,
         subject: '[TEST] Deine Nolea Produkte sind da ✨',
         html: `
@@ -201,7 +201,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, 
     if (resend && customerEmail) {
       try {
         await resend.emails.send({
-          from: 'Nolea Studio <onboarding@resend.dev>', // In Produktion eigene Domain nutzen
+          from: 'Nolea Studio <noreply@nolea.shop>',
           to: customerEmail,
           subject: 'Vielen Dank! Deine Nolea Produkte sind da ✨',
           html: `
