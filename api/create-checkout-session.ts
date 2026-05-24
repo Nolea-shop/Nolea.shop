@@ -110,7 +110,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const customerEmail = userEmail || undefined;
 
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card', 'paypal'],
+      payment_method_types: ['card'], // TEMP: 'paypal' removed — nicht im Stripe-Dashboard aktiviert (2026-05-25). Bei Bedarf wieder hinzufügen + Dashboard aktivieren.
       line_items: validatedItems.map((item: any) => ({
         price_data: {
           currency: 'eur',
