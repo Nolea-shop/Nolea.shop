@@ -98,7 +98,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${resendApiKey}`,
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              'User-Agent': 'Nolea/1.0',
             },
             body: JSON.stringify({
               from: 'Nolea Studio <noreply@nolea.shop>',
