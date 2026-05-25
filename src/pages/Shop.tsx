@@ -1,9 +1,10 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { RecipeCard } from '../components/RecipeCard';
 import { getAllRecipes } from '../services/recipeService';
 import { Recipe } from '../types';
 import { ArrowUpDown, Grid, LayoutList, Search as SearchIcon, SlidersHorizontal } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useCategory } from '../context/CategoryContext';
 
 // Category color system — each category has its own identity
 const CATEGORY_COLORS: Record<string, {
@@ -116,8 +117,14 @@ export function Shop() {
   const [category, setCategory] = useState('All');
   const [sortBy, setSortBy] = useState('default');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const { setActiveCategory } = useCategory();
 
   const colors = CATEGORY_COLORS[category] || CATEGORY_COLORS['All'];
+
+  // Sync category with global context for nav/footer colors
+  useEffect(() => {
+    setActiveCategory(category, colors);
+  }, [category, colors, setActiveCategory]);
 
   useEffect(() => {
     getAllRecipes().then(setRecipes).finally(() => setLoading(false));
