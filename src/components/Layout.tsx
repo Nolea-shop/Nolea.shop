@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingBasket, User, LogOut, Menu, X, Home, Store, Info, Shield } from 'lucide-react';
+import { ShoppingBasket, Menu, X, Home, Store } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { auth, signInWithGoogle } from '../lib/firebase';
-import { useAuthState } from 'react-firebase-hooks/auth';
 import { motion, AnimatePresence } from 'motion/react';
 
 export function Navigation() {
-  const [user] = useAuthState(auth);
   const { totalItems } = useCart();
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -22,8 +19,6 @@ export function Navigation() {
       return () => clearTimeout(timer);
     }
   }, [totalItems]);
-
-  const isAdmin = user?.email === 'julianlegendstar@gmail.com';
 
   // Close menu on route change
   useEffect(() => {
@@ -85,18 +80,9 @@ export function Navigation() {
                 )}
               </Link>
             ))}
-            {isAdmin && (
-              <Link
-                to="/admin"
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-[#5C5748] hover:text-[#1F1D1A] hover:bg-[#F2EFE9]/50 transition-all"
-              >
-                <Shield size={14} />
-                Admin
-              </Link>
-            )}
           </div>
 
-          {/* Right Side - Cart & User */}
+          {/* Right Side - Cart only */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Cart Button */}
             <Link
@@ -120,30 +106,6 @@ export function Navigation() {
                 </motion.span>
               )}
             </Link>
-
-            {/* User Button */}
-            {user ? (
-              <div className="hidden sm:flex items-center gap-2">
-                <button
-                  onClick={() => auth.signOut()}
-                  className="p-2.5 text-[#5C5748] hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"
-                  title="Sign out"
-                >
-                  <LogOut size={18} strokeWidth={1.5} />
-                </button>
-                <div className="bg-[#F2EFE9] px-3 py-1.5 rounded-full text-xs font-medium text-[#1F1D1A]">
-                  Hi, {user.displayName?.split(' ')[0] || 'there'}
-                </div>
-              </div>
-            ) : (
-              <button
-                onClick={signInWithGoogle}
-                className="hidden sm:flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-[#1F1D1A] hover:bg-[#F2EFE9] rounded-xl transition-colors"
-              >
-                <User size={18} strokeWidth={1.5} />
-                <span>Sign In</span>
-              </button>
-            )}
 
             {/* Mobile Menu Toggle */}
             <button
@@ -191,21 +153,6 @@ export function Navigation() {
                   </button>
                 </div>
 
-                {/* User Info (if logged in) */}
-                {user && (
-                  <div className="p-6 border-b border-[#E5E2D9] bg-[#F2EFE9]/50">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-[#7A8F4E] rounded-full flex items-center justify-center text-white font-bold text-lg">
-                        {user.displayName?.[0] || 'G'}
-                      </div>
-                      <div>
-                        <p className="font-medium text-[#1F1D1A]">{user.displayName || 'Guest'}</p>
-                        <p className="text-xs text-[#5C5748]">{user.email}</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
                 {/* Navigation Links */}
                 <div className="flex-1 overflow-y-auto py-4">
                   <nav className="px-4 space-y-1">
@@ -228,33 +175,7 @@ export function Navigation() {
                         )}
                       </Link>
                     ))}
-                    <Link
-                      to="/impressum"
-                      className="flex items-center gap-3 px-4 py-4 text-[#5C5748] hover:bg-[#F2EFE9]/50 rounded-xl transition-colors text-base font-medium"
-                    >
-                      <Info size={20} strokeWidth={1.5} />
-                      <span>Legal Notice</span>
-                    </Link>
                   </nav>
-                </div>
-
-                {/* Footer with Login/Logout */}
-                <div className="p-4 border-t border-[#E5E2D9]">
-                  {user ? (
-                    <button
-                      onClick={() => { auth.signOut(); setIsMenuOpen(false); }}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3.5 text-red-500 hover:bg-red-50 rounded-xl transition-colors font-medium touch-target"
-                    >
-                      <LogOut size={18} /> Sign Out
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => { signInWithGoogle(); setIsMenuOpen(false); }}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-[#7A8F4E] text-white hover:bg-[#5C6F3A] rounded-xl transition-colors font-medium touch-target"
-                    >
-                      <User size={18} /> Sign In with Google
-                    </button>
-                  )}
                 </div>
               </div>
             </motion.div>
@@ -379,7 +300,9 @@ export function Footer() {
             </h4>
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-2 text-sm text-[#5C5748]">
-                <Shield size={16} className="text-[#7A8F4E]" />
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[#7A8F4E]">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
                 <span>SSL Encrypted</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-[#5C5748]">

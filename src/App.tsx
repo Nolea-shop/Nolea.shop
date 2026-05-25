@@ -6,6 +6,7 @@ import { Navigation, Footer } from './components/Layout';
 import { CookieBanner } from './components/CookieBanner';
 import { Home } from './pages/Home';
 import { Shop } from './pages/Shop';
+import { ProductDetail } from './pages/ProductDetail';
 import { Cart } from './pages/Cart';
 import { Admin } from './pages/Admin';
 import { Success } from './pages/Success';
@@ -28,6 +29,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/shop" element={<Shop />} />
+              <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/success" element={<Success />} />
