@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingBasket, User, LogOut, ShieldCheck, Menu, X, Search, Home, Store, Info } from 'lucide-react';
+import { ShoppingBasket, User, LogOut, Menu, X, Home, Store, Info, Shield } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { auth, signInWithGoogle } from '../lib/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -39,35 +39,71 @@ export function Navigation() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const navLinks = [
+    { to: '/', label: 'Home', icon: Home },
+    { to: '/shop', label: 'Shop', icon: Store },
+    { to: '/cart', label: 'Cart', icon: ShoppingBasket },
+  ];
+
   return (
     <>
-      <nav className={`sticky top-0 z-50 transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-[#E5E2D9]' 
-          : 'bg-white/80 backdrop-blur-md border-b border-transparent'
-      }`}>
+      <nav
+        className={`sticky top-0 z-50 transition-all duration-500 ${
+          isScrolled
+            ? 'liquid-glass-strong border-b border-[#E5E2D9]/60'
+            : 'bg-transparent border-b border-transparent'
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
           {/* Logo */}
-          <Link to="/" className="text-xl sm:text-2xl font-serif font-bold italic tracking-tight text-[#2D2A26] hover:text-[#8A9A5B] transition-colors">
+          <Link
+            to="/"
+            className="text-xl sm:text-2xl font-serif font-bold italic tracking-tight text-[#1F1D1A] hover:text-[#7A8F4E] transition-colors duration-300"
+          >
             Nolea
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex gap-6 lg:gap-8 items-center">
-            <Link 
-              to="/shop" 
-              className={`font-sans text-xs font-bold uppercase tracking-widest px-2 py-2 transition-colors ${
-                location.pathname === '/shop' ? 'text-[#2D2A26] border-b-2 border-[#8A9A5B]' : 'text-[#6B6658] hover:text-[#2D2A26]'
-              }`}
-            >
-              Shop
-            </Link>
+          <div className="hidden md:flex gap-1 lg:gap-2 items-center">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  location.pathname === link.to
+                    ? 'text-[#1F1D1A] bg-[#F2EFE9]'
+                    : 'text-[#5C5748] hover:text-[#1F1D1A] hover:bg-[#F2EFE9]/50'
+                }`}
+              >
+                {link.label}
+                {location.pathname === link.to && (
+                  <motion.div
+                    layoutId="activeNav"
+                    className="absolute inset-0 bg-[#F2EFE9] rounded-xl -z-10"
+                    transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+              </Link>
+            ))}
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-[#5C5748] hover:text-[#1F1D1A] hover:bg-[#F2EFE9]/50 transition-all"
+              >
+                <Shield size={14} />
+                Admin
+              </Link>
+            )}
           </div>
 
           {/* Right Side - Cart & User */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Cart Button */}
-            <Link to="/cart" className="relative p-2 sm:p-2.5 text-[#2D2A26] hover:bg-[#F2EFE9] rounded-full transition-colors btn-press">
+            <Link
+              to="/cart"
+              className="relative p-2.5 sm:p-3 text-[#1F1D1A] hover:bg-[#F2EFE9] rounded-xl transition-colors btn-press touch-target"
+              aria-label={`Shopping cart with ${totalItems} items`}
+            >
               <motion.div
                 animate={cartAnimate ? { scale: [1, 1.2, 1] } : {}}
                 transition={{ duration: 0.3 }}
@@ -75,10 +111,10 @@ export function Navigation() {
                 <ShoppingBasket size={22} strokeWidth={1.5} />
               </motion.div>
               {totalItems > 0 && (
-                <motion.span 
+                <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="absolute -top-1 -right-1 bg-[#8A9A5B] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm"
+                  className="absolute -top-1 -right-1 bg-[#7A8F4E] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm"
                 >
                   {totalItems > 9 ? '9+' : totalItems}
                 </motion.span>
@@ -88,31 +124,32 @@ export function Navigation() {
             {/* User Button */}
             {user ? (
               <div className="hidden sm:flex items-center gap-2">
-                <button 
+                <button
                   onClick={() => auth.signOut()}
-                  className="p-2 text-[#6B6658] hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
-                  title="Abmelden"
+                  className="p-2.5 text-[#5C5748] hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                  title="Sign out"
                 >
                   <LogOut size={18} strokeWidth={1.5} />
                 </button>
-                <div className="bg-[#F2EFE9] px-3 py-1.5 rounded-full text-xs font-medium text-[#2D2A26]">
-                  Hallo, {user.displayName?.split(' ')[0] || 'Liebling'}
+                <div className="bg-[#F2EFE9] px-3 py-1.5 rounded-full text-xs font-medium text-[#1F1D1A]">
+                  Hi, {user.displayName?.split(' ')[0] || 'there'}
                 </div>
               </div>
             ) : (
-              <button 
+              <button
                 onClick={signInWithGoogle}
-                className="hidden sm:flex items-center gap-2 p-2 text-[#2D2A26] hover:bg-[#F2EFE9] rounded-full transition-colors"
+                className="hidden sm:flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-[#1F1D1A] hover:bg-[#F2EFE9] rounded-xl transition-colors"
               >
-                <User size={22} strokeWidth={1.5} />
+                <User size={18} strokeWidth={1.5} />
+                <span>Sign In</span>
               </button>
             )}
 
             {/* Mobile Menu Toggle */}
-            <button 
+            <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 text-[#2D2A26] hover:bg-[#F2EFE9] rounded-full transition-colors"
-              aria-label="Menü"
+              className="md:hidden p-2.5 text-[#1F1D1A] hover:bg-[#F2EFE9] rounded-xl transition-colors touch-target"
+              aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
             >
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -125,29 +162,30 @@ export function Navigation() {
         {isMenuOpen && (
           <>
             {/* Backdrop */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMenuOpen(false)}
               className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 md:hidden"
             />
-            
+
             {/* Menu Panel */}
-            <motion.div 
+            <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 bottom-0 w-[80%] max-w-sm bg-white z-50 md:hidden shadow-2xl"
+              className="fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-[#FAF9F6] z-50 md:hidden shadow-2xl"
             >
               <div className="flex flex-col h-full">
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 border-b border-[#E5E2D9]">
-                  <span className="text-xl font-serif font-bold italic text-[#2D2A26]">Menü</span>
-                  <button 
+                  <span className="text-xl font-serif font-bold italic text-[#1F1D1A]">Menu</span>
+                  <button
                     onClick={() => setIsMenuOpen(false)}
-                    className="p-2 text-[#6B6658] hover:bg-[#F2EFE9] rounded-full"
+                    className="p-2.5 text-[#5C5748] hover:bg-[#F2EFE9] rounded-xl touch-target"
+                    aria-label="Close menu"
                   >
                     <X size={24} />
                   </button>
@@ -157,12 +195,12 @@ export function Navigation() {
                 {user && (
                   <div className="p-6 border-b border-[#E5E2D9] bg-[#F2EFE9]/50">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-[#8A9A5B] rounded-full flex items-center justify-center text-white font-bold">
+                      <div className="w-12 h-12 bg-[#7A8F4E] rounded-full flex items-center justify-center text-white font-bold text-lg">
                         {user.displayName?.[0] || 'G'}
                       </div>
                       <div>
-                        <p className="font-medium text-[#2D2A26]">{user.displayName || 'Gast'}</p>
-                        <p className="text-xs text-[#6B6658]">{user.email}</p>
+                        <p className="font-medium text-[#1F1D1A]">{user.displayName || 'Guest'}</p>
+                        <p className="text-xs text-[#5C5748]">{user.email}</p>
                       </div>
                     </div>
                   </div>
@@ -171,53 +209,31 @@ export function Navigation() {
                 {/* Navigation Links */}
                 <div className="flex-1 overflow-y-auto py-4">
                   <nav className="px-4 space-y-1">
-                    <Link 
-                      to="/" 
-                      className="flex items-center gap-3 px-4 py-4 text-[#2D2A26] hover:bg-[#F2EFE9] rounded-xl transition-colors"
-                    >
-                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                        <polyline points="9,22 9,12 15,12 15,22"/>
-                      </svg>
-                      <span className="font-medium">Startseite</span>
-                    </Link>
-                    <Link 
-                      to="/shop" 
-                      className="flex items-center gap-3 px-4 py-4 text-[#2D2A26] hover:bg-[#F2EFE9] rounded-xl transition-colors"
-                    >
-                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-                        <line x1="3" x2="21" y1="6" y2="6"/>
-                        <path d="M16 10a4 4 0 0 1-8 0"/>
-                      </svg>
-                      <span className="font-medium">Shop</span>
-                    </Link>
-                    <Link 
-                      to="/cart" 
-                      className="flex items-center gap-3 px-4 py-4 text-[#2D2A26] hover:bg-[#F2EFE9] rounded-xl transition-colors"
-                    >
-                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="8" cy="21" r="1"/>
-                        <circle cx="19" cy="21" r="1"/>
-                        <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
-                      </svg>
-                      <span className="font-medium">Warenkorb</span>
-                      {totalItems > 0 && (
-                        <span className="ml-auto bg-[#8A9A5B] text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                          {totalItems}
-                        </span>
-                      )}
-                    </Link>
-                    <Link 
+                    {navLinks.map((link) => (
+                      <Link
+                        key={link.to}
+                        to={link.to}
+                        className={`flex items-center gap-3 px-4 py-4 rounded-xl transition-colors text-base font-medium ${
+                          location.pathname === link.to
+                            ? 'bg-[#F2EFE9] text-[#1F1D1A]'
+                            : 'text-[#5C5748] hover:bg-[#F2EFE9]/50'
+                        }`}
+                      >
+                        <link.icon size={20} strokeWidth={1.5} />
+                        <span>{link.label}</span>
+                        {link.to === '/cart' && totalItems > 0 && (
+                          <span className="ml-auto bg-[#7A8F4E] text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                            {totalItems}
+                          </span>
+                        )}
+                      </Link>
+                    ))}
+                    <Link
                       to="/impressum"
-                      className="flex items-center gap-3 px-4 py-4 text-[#2D2A26] hover:bg-[#F2EFE9] rounded-xl transition-colors"
+                      className="flex items-center gap-3 px-4 py-4 text-[#5C5748] hover:bg-[#F2EFE9]/50 rounded-xl transition-colors text-base font-medium"
                     >
-                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="16" x2="12" y2="12"/>
-                        <line x1="12" y1="8" x2="12.01" y2="8"/>
-                      </svg>
-                      <span className="font-medium">Impressum</span>
+                      <Info size={20} strokeWidth={1.5} />
+                      <span>Legal Notice</span>
                     </Link>
                   </nav>
                 </div>
@@ -225,18 +241,18 @@ export function Navigation() {
                 {/* Footer with Login/Logout */}
                 <div className="p-4 border-t border-[#E5E2D9]">
                   {user ? (
-                    <button 
+                    <button
                       onClick={() => { auth.signOut(); setIsMenuOpen(false); }}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl transition-colors font-medium"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3.5 text-red-500 hover:bg-red-50 rounded-xl transition-colors font-medium touch-target"
                     >
-                      <LogOut size={18} /> Abmelden
+                      <LogOut size={18} /> Sign Out
                     </button>
                   ) : (
-                    <button 
+                    <button
                       onClick={() => { signInWithGoogle(); setIsMenuOpen(false); }}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#8A9A5B] text-white hover:bg-[#6B7A46] rounded-xl transition-colors font-medium"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-[#7A8F4E] text-white hover:bg-[#5C6F3A] rounded-xl transition-colors font-medium touch-target"
                     >
-                      <User size={18} /> Mit Google anmelden
+                      <User size={18} /> Sign In with Google
                     </button>
                   )}
                 </div>
@@ -247,55 +263,36 @@ export function Navigation() {
       </AnimatePresence>
 
       {/* Mobile Bottom Navigation Bar */}
-      <motion.div 
+      <motion.div
         initial={{ y: 100 }}
         animate={{ y: 0 }}
         transition={{ type: 'spring', damping: 20, stiffness: 200 }}
-        className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E5E2D9] md:hidden z-40 safe-area-inset-bottom"
+        className="fixed bottom-0 left-0 right-0 liquid-glass-strong border-t border-[#E5E2D9]/60 md:hidden z-40 pb-safe"
       >
-        <div className="flex justify-around items-center py-2 px-4">
-          <Link 
-            to="/" 
-            className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-colors ${
-              location.pathname === '/' ? 'text-[#8A9A5B]' : 'text-[#6B6658]'
-            }`}
-          >
-            <Home size={22} strokeWidth={1.5} />
-            <span className="text-[10px] font-medium">Start</span>
-          </Link>
-          
-          <Link 
-            to="/shop" 
-            className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-colors ${
-              location.pathname === '/shop' ? 'text-[#8A9A5B]' : 'text-[#6B6658]'
-            }`}
-          >
-            <Store size={22} strokeWidth={1.5} />
-            <span className="text-[10px] font-medium">Shop</span>
-          </Link>
-          
-          <Link 
-            to="/cart" 
-            className={`relative flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-colors ${
-              location.pathname === '/cart' ? 'text-[#8A9A5B]' : 'text-[#6B6658]'
-            }`}
-          >
-            <ShoppingBasket size={22} strokeWidth={1.5} />
-            {totalItems > 0 && (
-              <span className="absolute -top-1 right-2 bg-[#8A9A5B] text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
-                {totalItems > 9 ? '9+' : totalItems}
-              </span>
-            )}
-            <span className="text-[10px] font-medium">Warenkorb</span>
-          </Link>
-          
-          <Link 
-            to="/impressum"
-            className="flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-colors"
-          >
-            <Info size={22} strokeWidth={1.5} />
-            <span className="text-[10px] font-medium">Impressum</span>
-          </Link>
+        <div className="flex justify-around items-center py-2 px-2">
+          {[
+            { to: '/', label: 'Home', icon: Home },
+            { to: '/shop', label: 'Shop', icon: Store },
+            { to: '/cart', label: 'Cart', icon: ShoppingBasket },
+          ].map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-colors min-w-[64px] touch-target ${
+                location.pathname === item.to ? 'text-[#7A8F4E]' : 'text-[#5C5748]'
+              }`}
+            >
+              <div className="relative">
+                <item.icon size={24} strokeWidth={1.5} />
+                {item.to === '/cart' && totalItems > 0 && (
+                  <span className="absolute -top-2 -right-2.5 bg-[#7A8F4E] text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+                    {totalItems > 9 ? '9+' : totalItems}
+                  </span>
+                )}
+              </div>
+              <span className="text-[11px] font-medium">{item.label}</span>
+            </Link>
+          ))}
         </div>
       </motion.div>
     </>
@@ -303,46 +300,121 @@ export function Navigation() {
 }
 
 export function Footer() {
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer className="bg-white border-t border-[#E5E2D9] pt-12 md:pt-16 pb-24 md:pb-24">
+    <footer className="bg-white border-t border-[#E5E2D9] pt-12 md:pt-16 pb-28 md:pb-8">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 text-[#2D2A26]">
-          <div>
-            <h3 className="text-xl font-serif font-bold italic mb-4">Nolea</h3>
-            <p className="text-[#6B6658] font-serif italic text-sm leading-relaxed">
-              Exquisite digitale Produkte für einen bewussten Lebensstil. <br />
-              Inspiration, Qualität und Ästhetik in jedem Guide.
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12 text-[#1F1D1A]">
+          {/* Brand */}
+          <div className="md:col-span-1">
+            <h3 className="text-2xl font-serif font-bold italic mb-4">Nolea</h3>
+            <p className="text-[#5C5748] text-sm leading-relaxed max-w-xs">
+              Curated digital guides for a conscious lifestyle. Quality, inspiration, and aesthetics in every product.
             </p>
           </div>
-          <div>
-            <h4 className="text-xs font-bold uppercase tracking-widest text-[#2D2A26] mb-4 md:mb-6">Shop</h4>
-            <ul className="flex flex-col gap-2 md:gap-3 text-[#6B6658] text-sm">
-              <li><Link to="/shop" className="hover:text-[#8A9A5B] transition-colors">Alle Produkte</Link></li>
-              <li><Link to="/shop?cat=lifestyle" className="hover:text-[#8A9A5B] transition-colors">Lifestyle Guides</Link></li>
-              <li><Link to="/shop?cat=wellness" className="hover:text-[#8A9A5B] transition-colors">Wellness & Mindset</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="text-xs font-bold uppercase tracking-widest text-[#2D2A26] mb-4 md:mb-6">Rechtliches</h4>
-            <ul className="flex flex-col gap-2 md:gap-3 text-[#6B6658] text-sm">
-              <li><Link to="/impressum" className="hover:text-[#8A9A5B] transition-colors">Impressum</Link></li>
-              <li><Link to="/datenschutz" className="hover:text-[#8A9A5B] transition-colors">Datenschutz</Link></li>
-              <li><Link to="/agb" className="hover:text-[#8A9A5B] transition-colors">AGB</Link></li>
 
+          {/* Shop */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-widest text-[#1F1D1A] mb-4 md:mb-6">
+              Shop
+            </h4>
+            <ul className="flex flex-col gap-2.5 md:gap-3 text-[#5C5748] text-sm">
+              <li>
+                <Link to="/shop" className="hover:text-[#7A8F4E] transition-colors">
+                  All Products
+                </Link>
+              </li>
+              <li>
+                <Link to="/shop?cat=lifestyle" className="hover:text-[#7A8F4E] transition-colors">
+                  Lifestyle Guides
+                </Link>
+              </li>
+              <li>
+                <Link to="/shop?cat=wellness" className="hover:text-[#7A8F4E] transition-colors">
+                  Wellness & Mindset
+                </Link>
+              </li>
+              <li>
+                <Link to="/shop?cat=food" className="hover:text-[#7A8F4E] transition-colors">
+                  Food & Nutrition
+                </Link>
+              </li>
             </ul>
           </div>
-        </div>
-        <div className="max-w-7xl mx-auto px-4 md:px-6 mt-10 md:mt-16 pt-6 md:pt-8 border-t border-[#F2EFE9] flex flex-col md:flex-row justify-between items-center text-[10px] text-[#6B6658] uppercase tracking-[0.2em] gap-3 md:gap-4">
-          <span>© 2024 Nolea Studio &bull; Alle Rechte vorbehalten</span>
-          <div className="flex gap-4 md:gap-6 items-center">
-            <span className="flex items-center gap-1.5"><ShoppingBasket size={12}/> Stripe Checkout</span>
-            <span className="flex items-center gap-1.5">PayPal Ready</span>
+
+          {/* Support */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-widest text-[#1F1D1A] mb-4 md:mb-6">
+              Support
+            </h4>
+            <ul className="flex flex-col gap-2.5 md:gap-3 text-[#5C5748] text-sm">
+              <li>
+                <Link to="/impressum" className="hover:text-[#7A8F4E] transition-colors">
+                  Legal Notice
+                </Link>
+              </li>
+              <li>
+                <span className="hover:text-[#7A8F4E] transition-colors cursor-pointer">
+                  Privacy Policy
+                </span>
+              </li>
+              <li>
+                <span className="hover:text-[#7A8F4E] transition-colors cursor-pointer">
+                  Terms of Service
+                </span>
+              </li>
+              <li>
+                <span className="hover:text-[#7A8F4E] transition-colors cursor-pointer">
+                  Contact
+                </span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Trust */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-widest text-[#1F1D1A] mb-4 md:mb-6">
+              Trust & Safety
+            </h4>
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-2 text-sm text-[#5C5748]">
+                <Shield size={16} className="text-[#7A8F4E]" />
+                <span>SSL Encrypted</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-[#5C5748]">
+                <ShoppingBasket size={16} className="text-[#7A8F4E]" />
+                <span>Stripe Checkout</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-[#5C5748]">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[#7A8F4E]">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <span>Buyer Protection</span>
+              </div>
+            </div>
           </div>
         </div>
-        
-        {/* Designed by sssalty */}
-        <div className="text-center text-[10px] text-[#6B6658] py-4 mt-4 border-t border-[#F2EFE9] opacity-60">
-          designed by sssalty
+
+        {/* Bottom Bar */}
+        <div className="mt-10 md:mt-16 pt-6 md:pt-8 border-t border-[#F2EFE9] flex flex-col md:flex-row justify-between items-center text-xs text-[#5C5748] gap-3">
+          <span>© {currentYear} Nolea Studio. All rights reserved.</span>
+          <div className="flex gap-4 md:gap-6 items-center">
+            <span className="flex items-center gap-1.5">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              Secure Payment
+            </span>
+            <span className="flex items-center gap-1.5">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 6v6l4 2"/>
+              </svg>
+              30-Day Returns
+            </span>
+          </div>
         </div>
       </div>
     </footer>

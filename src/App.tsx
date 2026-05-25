@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { CartProvider } from './context/CartContext';
 import { Navigation, Footer } from './components/Layout';
+import { CookieBanner } from './components/CookieBanner';
 import { Home } from './pages/Home';
 import { Shop } from './pages/Shop';
 import { Cart } from './pages/Cart';
@@ -38,6 +39,7 @@ function App() {
           <Footer />
         </div>
         <Toaster position="bottom-right" />
+        <CookieBanner />
       </CartProvider>
     </BrowserRouter>
   );
