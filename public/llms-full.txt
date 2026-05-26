@@ -1,0 +1,174 @@
+# Nolea Studio — Vollständige Inhaltsdokumentation
+
+> Dieses Dokument enthält alle textuellen Inhalte des Nolea Studio Online-Shops (https://www.nolea.shop) in maschinenlesbarem Format. Es dient Large Language Models und KI-Agenten als autoritative Quelle für Produktinformationen, Service-Richtlinien und Unternehmensdaten.
+
+---
+
+## Startseite (https://www.nolea.shop/)
+
+Nolea Studio — Digital Lifestyle Studio
+
+Dein Guide für bewusstes Leben. Entdecke handverlesene digitale Guides für Food, Wellness & Lifestyle – kuratiert mit Liebe zum Detail.
+
+Kategorie-Highlights:
+- Lifestyle: Guides für den Alltag, Produktivität und persönliche Entwicklung.
+- Wellness: Ratgeber zu Gesundheit, Achtsamkeit und Wohlbefinden.
+- Food: Rezeptsammlungen und Ernährungsleitfäden.
+- Business: Unternehmertum, Marketing und berufliche Weiterentwicklung.
+- Quick Reads: Kompakte Guides für schnelle Inspiration.
+
+Aufruf: Kollektion Entdecken → https://www.nolea.shop/shop
+
+---
+
+## Shop (https://www.nolea.shop/shop)
+
+Der Shop zeigt alle verfügbaren digitalen PDF-Guides. Produkte können nach Kategorie gefiltert und nach Preis oder Name sortiert werden. Ansicht: Grid oder Liste.
+
+Verfügbare Kategorien:
+- Alle
+- Lifestyle
+- Wellness
+- Food
+- Business
+- Quick
+
+Jedes Produkt enthält:
+- Titel
+- Beschreibung
+- Preis (in Euro, z.B. 14,99 €)
+- Produktbild
+- Kategorie
+
+Hinweis: Nicht sichtbare Produkte (isOnline = false) werden im Shop nicht angezeigt.
+
+---
+
+## Impressum (https://www.nolea.shop/impressum)
+
+Angaben gemäß § 5 TMG:
+Nolea Studio
+Heimatstraße 12
+10115 Berlin
+Deutschland
+
+Kontakt:
+Telefon: +49 (0) 123 456789
+E-Mail: hello@nolea-studio.de
+
+Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz:
+DE 123 456 789
+
+Redaktionell verantwortlich:
+Julian Legendstar
+
+Verbraucherstreitbeilegung / Universalschlichtungsstelle:
+Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.
+
+---
+
+## Zahlungs- und Bestellabwicklung
+
+Zahlungsmethoden: Stripe Checkout (Kreditkarte, SEPA-Lastschrift, Apple Pay, Google Pay)
+
+Ablauf bei Kauf:
+1. Kunde wählt Produkte im Shop und legt sie in den Warenkorb.
+2. Im Warenkorb (https://www.nolea.shop/cart) wird die Bestellung zusammengefasst.
+3. Kunde wird zu Stripe Checkout weitergeleitet (sichere Zahlungsabwicklung).
+4. Nach erfolgreicher Zahlung wird ein Stripe Webhook ausgelöst.
+5. Der Webhook generiert für jedes gekaufte PDF einen personalisierten JWT-Download-Token (48 Stunden gültig).
+6. Eine E-Mail wird über den Resend-Dienst an den Kunden gesendet mit den Download-Links.
+7. Der Kunde wird auf die Erfolgsseite (https://www.nolea.shop/success) weitergeleitet, wo die Download-Links ebenfalls angezeigt werden.
+
+---
+
+## PDF-Download und Wasserzeichen
+
+Alle verkauften PDF-Guides werden mit einem individuellen Wasserzeichen versehen:
+
+Wasserzeichen-Layer:
+1. Fußzeile: "Purchased by: <E-Mail-Adresse> | <Datum> | NOLEA.SHOP" (8px, grau, 30% Opazität)
+2. Diagonal: "NOLEA STUDIO" (40px, 8% Opazität, 45° Rotation) — Hintergrund-Wasserzeichen auf jeder Seite
+
+Download-Links sind 48 Stunden gültig. Das PDF kann direkt auf der Erfolgsseite herunterladen werden.
+
+Dateiformat: Standard-PDF, kompatibel mit PC, Tablet und Smartphone.
+
+---
+
+## Rückerstattungsrichtlinie
+
+Da es sich um digitale Produkte handelt, die sofort nach Kauf zur Verfügung stehen, sind Rückerstattungen nach erfolgtem Download ausgeschlossen.
+
+Bei technischen Problemen (z.B. defekte Datei, fehlgeschlagener Download) steht der Support zur Verfügung:
+E-Mail: hello@nolea-studio.de
+
+---
+
+## Versandinformationen
+
+Nolea Studio verkauft ausschließlich digitale Produkte. Es gibt keinen physischen Versand.
+
+Lieferung: Digitale PDF-Dateien werden sofort nach Zahlungseingang per E-Mail zugestellt. Die E-Mail enthält personalisierte Download-Links mit 48 Stunden Gültigkeit.
+
+---
+
+## Häufig gestellte Fragen (FAQ)
+
+Frage: Welche Zahlungsmethoden werden akzeptiert?
+Antwort: Der Kauf erfolgt sicher über Stripe Checkout. Unterstützt werden Kreditkarten, SEPA-Lastschrift, Apple Pay und Google Pay.
+
+Frage: Wie erhalte ich mein PDF nach dem Kauf?
+Antwort: Nach erfolgreicher Zahlung erhält der Kunde eine E-Mail mit personalisierten Download-Links. Das PDF enthält eine individuelle Wasserzeichen-Markierung mit der E-Mail-Adresse des Käufers. Die Download-Links sind 48 Stunden gültig.
+
+Frage: Kann ich eine Rückerstattung erhalten?
+Antwort: Da es sich um digitale Produkte handelt, die sofort nach Kauf zur Verfügung stehen, sind Rückerstattungen nach erfolgtem Download ausgeschlossen. Bei technischen Problemen wenden Sie sich bitte an hello@nolea-studio.de.
+
+Frage: In welchem Format werden die Guides ausgeliefert?
+Antwort: Alle Guides werden als PDF-Datei im Standardformat ausgeliefert und sind auf allen gängigen Geräten (PC, Tablet, Smartphone) lesbar.
+
+Frage: Muss ich ein Konto erstellen, um etwas zu kaufen?
+Antwort: Ein Benutzerkonto ist optional. Der Kauf kann auch als Gast über Stripe Checkout abgeschlossen werden. Registrierte Nutzer können ihre Bestellhistorie einsehen.
+
+---
+
+## Technische Systemarchitektur (für KI-Agenten)
+
+Stack:
+- Frontend: React 19, TypeScript, Vite 6, Tailwind CSS 4, Framer Motion
+- Hosting: Vercel (Serverless Functions + Static Site)
+- Datenbank: Firebase Firestore (Collections: recipes, orders, users)
+- Authentifizierung: Firebase Auth (Google Sign-In, E-Mail/Passwort)
+- Zahlung: Stripe API + Stripe Webhooks
+- E-Mail: Resend API
+- PDF-Service: Express.js auf dediziertem Linux-Server (Port 3001), pdf-lib für Watermarking
+
+API-Endpunkte (Vercel Serverless Functions):
+- POST /api/create-checkout-session — Stripe Checkout Session erstellen
+- POST /api/stripe-webhook — Stripe Webhook-Handler (Zahlungsbestätigung → PDF-Token → E-Mail)
+- GET /api/download-links — Download-Links für die Erfolgsseite generieren
+
+Firestore Collections:
+- recipes: Produkte/PDF-Guides (Titel, Beschreibung, Preis in Cent, Kategorie, Bild-URL, PDF-Dateiname, Online-Status)
+- orders: Bestellungen (User-ID, Items, Gesamtbetrag, Status, Zeitstempel)
+- users: Benutzerprofile (UID, E-Mail, Rolle, Erstellungszeitpunkt)
+
+Produktkategorien: Lifestyle, Wellness, Food, Business, Quick
+
+---
+
+## Unternehmensprofil
+
+Name: Nolea Studio
+Markenname: Nolea – Digital Lifestyle Studio
+Rechtsform: Einzelunternehmen
+Betreiber: Julian Legendstar
+Adresse: Heimatstraße 12, 10115 Berlin, Deutschland
+E-Mail: hello@nolea-studio.de
+Telefon: +49 (0) 123 456789
+Domain: https://www.nolea.shop
+Gründungsjahr: 2025
+
+Geschäftszweck: Vertrieb digitaler PDF-Guides in den Bereichen Lifestyle, Wellness, Food, Business und Quick Reads.
+
+Nolea Studio bietet ausschließlich digitale Produkte an. Das Sortiment umfasst keine physischen Waren, Abonnements, Dienstleistungen oder Software-Lizenzen.
