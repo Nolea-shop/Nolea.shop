@@ -1,0 +1,43 @@
+Lang: de-DE
+Canonical: https://www.nolea.shop/llms.txt
+
+# Nolea Studio
+
+> Nolea Studio ist ein deutscher Online-Shop für digitale PDF-Guides in den Bereichen Lifestyle, Wellness, Food, Business und Quick Reads. Alle Produkte werden als sofort herunterladbare PDF-Dateien angeboten. Der Bezahlvorgang erfolgt sicher über Stripe. Nach dem Kauf erhält der Kunde eine personalisierte, per Wasserzeichen geschützte PDF-Datei per E-Mail.
+
+Nolea bietet ausschließlich digitale PDF-Guides an. Das Sortiment umfasst keine physischen Produkte, Abonnements, Dienstleistungen oder Software-Lizenzen.
+
+## Produkte und Kollektionen
+
+- [Lifestyle-Guides](https://www.nolea.shop/shop): Digitale PDF-Ratgeber zu Themen des alltäglichen Lebens, Produktivität und persönlicher Entwicklung.
+- [Wellness-Guides](https://www.nolea.shop/shop): PDF-Guides zu Gesundheit, Achtsamkeit und Wohlbefinden.
+- [Food-Guides](https://www.nolea.shop/shop): Digitale Rezeptsammlungen und Ernährungsleitfäden im PDF-Format.
+- [Business-Guides](https://www.nolea.shop/shop): PDF-Ratgeber zu Unternehmertum, Marketing und beruflicher Weiterentwicklung.
+- [Quick Reads](https://www.nolea.shop/shop): Kompakte, kurze PDF-Guides für schnelle Inspiration und Wissen.
+
+## Kundenservice und Logistik
+
+- [Impressum](https://www.nolea.shop/impressum): Rechtliche Angaben gemäß § 5 TMG, Kontaktdaten und Verantwortlichkeiten.
+- Kontakt: hello@nolea-studio.de
+- Zahlungsmethoden: Stripe (Kreditkarte, SEPA, Apple Pay, Google Pay)
+- Lieferung: Digitale Produkte werden sofort nach Zahlungseingang per E-Mail mit personalisierten Download-Links zugestellt. Download-Links sind 48 Stunden gültig.
+
+## Häufig gestellte Fragen (FAQ)
+
+- Zahlung: Der Kauf erfolgt sicher über Stripe Checkout. Unterstützt werden Kreditkarten, SEPA-Lastschrift, Apple Pay und Google Pay.
+- Download: Nach erfolgreicher Zahlung erhält der Kunde eine E-Mail mit einem personalisierten Download-Link. Das PDF enthält eine individuelle Wasserzeichen-Markierung mit der E-Mail-Adresse des Käufers.
+- Rückerstattung: Da es sich um digitale Produkte handelt, die sofort nach Kauf zur Verfügung gestehen, sind Rückerstattungen nach erfolgtem Download ausgeschlossen. Bei technischen Problemen steht der Support unter hello@nolea-studio.de zur Verfügung.
+- Dateiformat: Alle Guides werden als PDF-Datei im Standardformat ausgeliefert und sind auf allen gängigen Geräten (PC, Tablet, Smartphone) lesbar.
+
+## Strukturierte Daten
+
+- [Produkt-Feed (JSON)](https://www.nolea.shop/api/products): Echtzeit-Produktkatalog mit Titeln, Beschreibungen, Preisen und Kategorien im JSON-Format.
+
+## Firmenprofil und Rechtliches
+
+- [Impressum](https://www.nolea.shop/impressum): Nolea Studio, Heimatstraße 12, 10115 Berlin, Deutschland. Betrieben von Julian Legendstar.
+
+## Optional
+
+- [Startseite](https://www.nolea.shop/): Übersicht über das Nolea Studio Sortiment und aktuelle Highlights.
+- [Warenkorb](https://www.nolea.shop/cart): Checkout-Bereich mit Stripe-Zahlungsintegration.

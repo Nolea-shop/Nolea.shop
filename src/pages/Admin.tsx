@@ -67,7 +67,7 @@ export function Admin() {
   }, [user]);
 
   const handleSimulatePurchase = async () => {
-    if (!simEmail) return toast.error('Bitte E-Mail angeben');
+    if (!simEmail) return toast.error('Please enter an email');
     
     setIsSimulating(true);
     try {
@@ -82,10 +82,10 @@ export function Admin() {
       });
 
       if (response.ok) {
-        toast.success('Simulation erfolgreich! Email gesendet.');
+        toast.success('Simulation successful! Email sent.');
       } else {
         const error = await response.json();
-        toast.error(`Fehler: ${error.error}`);
+        toast.error(`Error: ${error.error}`);
       }
     } catch (error) {
       toast.error('Simulation fehlgeschlagen');
@@ -117,13 +117,13 @@ export function Admin() {
       setPublishProgress(60);
       setPublishStage('Assets werden verarbeitet...');
 
-      // Schritt 3: Verarbeitung (simuliert)
+      // Schritt 3: Processing (simuliert)
       await new Promise(resolve => setTimeout(resolve, 400));
       setPublishProgress(80);
       setPublishStage('Finalisiere...');
 
       // Erfolg
-      toast.success('Produkt hinzugefügt und veröffentlicht!', {
+      toast.success('Product published!', {
         icon: '✅',
         duration: 3000,
       });
@@ -150,7 +150,7 @@ export function Admin() {
       setPublishStage('');
       
       const errorMessage = error?.message || String(error);
-      toast.error(`Fehler: ${errorMessage.substring(0, 100)}`, { 
+      toast.error(`Error: ${errorMessage.substring(0, 100)}`, { 
         duration: 6000,
         icon: '⚠'
       });
@@ -169,12 +169,12 @@ export function Admin() {
     try {
       const { id, ...updateData } = editingRecipe;
       await updateRecipe(id, updateData);
-      toast.success('Produkt aktualisiert!');
+      toast.success('Product updated!');
       setEditModalOpen(false);
       setEditingRecipe(null);
       await loadData();
     } catch (error: any) {
-      toast.error(`Fehler beim Aktualisieren: ${error.message}`);
+      toast.error(`Error beim Aktualisieren: ${error.message}`);
     }
   };
 
@@ -184,14 +184,14 @@ export function Admin() {
       toast.success(recipe.isOnline ? 'Produkt offline gestellt' : 'Produkt online geschaltet!');
       await loadData();
     } catch (error: any) {
-      toast.error(`Fehler: ${error.message}`);
+      toast.error(`Error: ${error.message}`);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Produkt wirklich löschen?')) {
+    if (window.confirm('Really delete this product?')) {
       await deleteRecipe(id);
-      toast.success('Gelöscht');
+      toast.success('Deleted');
       await loadData();
     }
   };
@@ -203,8 +203,8 @@ export function Admin() {
   if (authLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#FAF9F6] p-6">
-        <div className="w-8 h-8 border-4 border-[#8A9A5B] border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-[#6B6658] font-serif italic">Prüfe Berechtigung...</p>
+        <div className="w-8 h-8 border-4 border-[#7A8F4E] border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="text-[#5C5748] font-serif italic">Checking permissions...</p>
       </div>
     );
   }
@@ -212,12 +212,12 @@ export function Admin() {
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#FAF9F6] p-6 text-center">
-        <div className="w-16 h-16 bg-[#F2EFE9] text-[#2D2A26] rounded-full flex items-center justify-center mb-6">
+        <div className="w-16 h-16 bg-[#F2EFE9] text-[#1F1D1A] rounded-full flex items-center justify-center mb-6">
           <ShieldAlert size={32} strokeWidth={1.5} />
         </div>
-        <h1 className="text-3xl font-serif italic text-[#2D2A26] mb-4">Creator Hub</h1>
-        <p className="text-[#6B6658] mb-8 max-w-sm text-sm">
-          Logge dich ein, um deine eigenen Guides hochzuladen und 90% des Umsatzes zu behalten.
+        <h1 className="text-3xl font-serif italic text-[#1F1D1A] mb-4">Creator Hub</h1>
+        <p className="text-[#5C5748] mb-8 max-w-sm text-sm">
+          Sign in, um deine eigenen Guides hochzuladen und 90% des Umsatzes zu behalten.
         </p>
         
         <button 
@@ -225,9 +225,9 @@ export function Admin() {
             const provider = new GoogleAuthProvider();
             signInWithPopup(auth, provider);
           }}
-          className="bg-[#8A9A5B] text-white px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#6B7A46] transition-all flex items-center gap-2"
+          className="bg-[#7A8F4E] text-white px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#6B7A46] transition-all flex items-center gap-2"
         >
-          <LogIn size={16} /> Mit Google Einloggen
+          <LogIn size={16} /> Sign in with Google
         </button>
       </div>
     );
@@ -241,8 +241,8 @@ export function Admin() {
         <XCircle className="text-red-400 shrink-0" size={24} />
       )}
       <div>
-        <h4 className="text-sm font-bold text-[#2D2A26] mb-1">{label}</h4>
-        <p className="text-xs text-[#6B6658] leading-relaxed">{description}</p>
+        <h4 className="text-sm font-bold text-[#1F1D1A] mb-1">{label}</h4>
+        <p className="text-xs text-[#5C5748] leading-relaxed">{description}</p>
       </div>
     </div>
   );
@@ -251,27 +251,27 @@ export function Admin() {
     <div className="min-h-screen bg-[#FAF9F6] flex" id="admin-panel">
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-[#E5E2D9] p-8 flex flex-col gap-10">
-        <div className="text-xl font-serif font-bold italic tracking-tight text-[#2D2A26]">{isAdmin ? 'Admin Panel' : 'Creator Hub'}</div>
+        <div className="text-xl font-serif font-bold italic tracking-tight text-[#1F1D1A]">{isAdmin ? 'Admin Panel' : 'Creator Hub'}</div>
         <nav className="flex flex-col gap-2" id="admin-nav">
           <button 
             data-testid="nav-recipes"
             onClick={() => setActiveTab('recipes')}
-            className={`flex items-center gap-3 p-3 rounded-xl transition-all text-xs font-bold uppercase tracking-wider ${activeTab === 'recipes' ? 'bg-[#8A9A5B] text-white shadow-sm' : 'text-[#6B6658] hover:bg-[#F2EFE9]'}`}
+            className={`flex items-center gap-3 p-3 rounded-xl transition-all text-xs font-bold uppercase tracking-wider ${activeTab === 'recipes' ? 'bg-[#7A8F4E] text-white shadow-sm' : 'text-[#5C5748] hover:bg-[#F2EFE9]'}`}
           >
             <Utensils size={18} strokeWidth={1.5} /> {isAdmin ? 'Produkte' : 'Meine Guides'}
           </button>
           <button 
             data-testid="nav-orders"
             onClick={() => setActiveTab('orders')}
-            className={`flex items-center gap-3 p-3 rounded-xl transition-all text-xs font-bold uppercase tracking-wider ${activeTab === 'orders' ? 'bg-[#8A9A5B] text-white shadow-sm' : 'text-[#6B6658] hover:bg-[#F2EFE9]'}`}
+            className={`flex items-center gap-3 p-3 rounded-xl transition-all text-xs font-bold uppercase tracking-wider ${activeTab === 'orders' ? 'bg-[#7A8F4E] text-white shadow-sm' : 'text-[#5C5748] hover:bg-[#F2EFE9]'}`}
           >
-            <ShoppingBag size={18} strokeWidth={1.5} /> {isAdmin ? 'Bestellungen' : 'Meine Verkäufe'}
+            <ShoppingBag size={18} strokeWidth={1.5} /> {isAdmin ? 'Orders' : 'My Sales'}
           </button>
           {isAdmin && (
             <button 
               data-testid="nav-system"
               onClick={() => setActiveTab('system')}
-              className={`flex items-center gap-3 p-3 rounded-xl transition-all text-xs font-bold uppercase tracking-wider ${activeTab === 'system' ? 'bg-[#8A9A5B] text-white shadow-sm' : 'text-[#6B6658] hover:bg-[#F2EFE9]'}`}
+              className={`flex items-center gap-3 p-3 rounded-xl transition-all text-xs font-bold uppercase tracking-wider ${activeTab === 'system' ? 'bg-[#7A8F4E] text-white shadow-sm' : 'text-[#5C5748] hover:bg-[#F2EFE9]'}`}
             >
               <Settings size={18} strokeWidth={1.5} /> System / AI
             </button>
@@ -285,57 +285,57 @@ export function Admin() {
           <div id="recipe-management">
             {/* Header Stats */}
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-3xl font-serif italic text-[#2D2A26]">Produkte Verwalten</h2>
+              <h2 className="text-3xl font-serif italic text-[#1F1D1A]">Manage Products</h2>
               <button 
                 id="btn-add-recipe"
-                className="bg-[#2D2A26] text-white px-6 py-3 rounded-xl flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:bg-black transition-all shadow-lg"
+                className="bg-[#1F1D1A] text-white px-6 py-3 rounded-xl flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:bg-black transition-all shadow-lg"
                 onClick={() => document.getElementById('add-recipe-modal')?.scrollIntoView({ behavior: 'smooth' })}
               >
-                <Plus size={18} /> Neues Produkt
+                <Plus size={18} /> New Product
               </button>
             </div>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
               <div className="bg-white rounded-2xl p-6 border border-[#E5E2D9]">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-[#6B6658] mb-2">{isAdmin ? 'Gesamt' : 'Meine Guides'}</div>
-                <div className="text-3xl font-serif italic text-[#2D2A26]">{recipes.length}</div>
+                <div className="text-[10px] font-bold uppercase tracking-widest text-[#5C5748] mb-2">{isAdmin ? 'Total' : 'Meine Guides'}</div>
+                <div className="text-3xl font-serif italic text-[#1F1D1A]">{recipes.length}</div>
               </div>
               <div className="bg-white rounded-2xl p-6 border border-[#E5E2D9]">
                 <div className="text-[10px] font-bold uppercase tracking-widest text-green-600 mb-2">Live</div>
                 <div className="text-3xl font-serif italic text-green-600">{onlineCount}</div>
               </div>
               <div className="bg-white rounded-2xl p-6 border border-[#E5E2D9]">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-[#6B6658] mb-2">{isAdmin ? 'Offline' : 'Entwürfe'}</div>
-                <div className="text-3xl font-serif italic text-[#6B6658]">{offlineCount}</div>
+                <div className="text-[10px] font-bold uppercase tracking-widest text-[#5C5748] mb-2">{isAdmin ? 'Offline' : 'Entwürfe'}</div>
+                <div className="text-3xl font-serif italic text-[#5C5748]">{offlineCount}</div>
               </div>
             </div>
 
             {/* Products Table */}
             <div className="bg-white rounded-[2rem] shadow-sm border border-[#E5E2D9] overflow-hidden mb-12">
               <table className="w-full text-left" id="recipes-table">
-                <thead className="bg-[#F2EFE9] border-b border-[#E5E2D9] uppercase text-[9px] font-bold tracking-[0.2em] text-[#6B6658]">
+                <thead className="bg-[#F2EFE9] border-b border-[#E5E2D9] uppercase text-[9px] font-bold tracking-[0.2em] text-[#5C5748]">
                   <tr>
-                    <th className="p-6">Bild</th>
-                    <th className="p-6">Titel</th>
-                    <th className="p-6">Kategorie</th>
+                    <th className="p-6">Image</th>
+                    <th className="p-6">Title</th>
+                    <th className="p-6">Category</th>
                     <th className="p-6">Preis</th>
                     <th className="p-6">Status</th>
-                    <th className="p-6 text-right">Aktion</th>
+                    <th className="p-6 text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F2EFE9]">
                   {loading ? (
                     <tr>
-                      <td colSpan={6} className="p-12 text-center text-[#6B6658]">
-                        <div className="w-8 h-8 border-4 border-[#8A9A5B] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                        Lädt...
+                      <td colSpan={6} className="p-12 text-center text-[#5C5748]">
+                        <div className="w-8 h-8 border-4 border-[#7A8F4E] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                        Loading...
                       </td>
                     </tr>
                   ) : recipes.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="p-12 text-center text-[#6B6658]">
-                        Keine Produkte vorhanden. Füge oben ein neues Produkt hinzu.
+                      <td colSpan={6} className="p-12 text-center text-[#5C5748]">
+                        No products available. Add a new product above.
                       </td>
                     </tr>
                   ) : recipes.map(recipe => (
@@ -343,14 +343,14 @@ export function Admin() {
                       <td className="p-6">
                         <img src={recipe.imageUrl} alt={recipe.title} className="w-12 h-12 rounded-lg object-cover border border-[#E5E2D9]" />
                       </td>
-                      <td className="p-6 font-serif italic text-[#2D2A26]">{recipe.title}</td>
-                      <td className="p-6 text-xs text-[#6B6658] font-bold uppercase tracking-widest">{recipe.category}</td>
-                      <td className="p-6 font-bold text-[#2D2A26]">{(recipe.price / 100).toFixed(2)}€</td>
+                      <td className="p-6 font-serif italic text-[#1F1D1A]">{recipe.title}</td>
+                      <td className="p-6 text-xs text-[#5C5748] font-bold uppercase tracking-widest">{recipe.category}</td>
+                      <td className="p-6 font-bold text-[#1F1D1A]">{(recipe.price / 100).toFixed(2)}€</td>
                       <td className="p-6">
                         <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest ${
                           recipe.isOnline 
                             ? 'bg-[#D9DED1] text-green-800' 
-                            : 'bg-[#F2EFE9] text-[#6B6658]'
+                            : 'bg-[#F2EFE9] text-[#5C5748]'
                         }`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${recipe.isOnline ? 'bg-green-600' : 'bg-gray-400'}`} />
                           {recipe.isOnline ? 'Online' : 'Offline'}
@@ -360,30 +360,30 @@ export function Admin() {
                         <div className="flex items-center justify-end gap-2">
                           <button 
                             onClick={() => handleToggleOnline(recipe)}
-                            className={`p-2 rounded-lg transition-colors ${recipe.isOnline ? 'text-[#6B6658] hover:bg-yellow-50' : 'text-green-600 hover:bg-green-50'}`}
-                            title={recipe.isOnline ? 'Offline schalten' : 'Online schalten'}
+                            className={`p-2 rounded-lg transition-colors ${recipe.isOnline ? 'text-[#5C5748] hover:bg-yellow-50' : 'text-green-600 hover:bg-green-50'}`}
+                            title={recipe.isOnline ? 'Take Offline' : 'Publish'}
                           >
                             {recipe.isOnline ? <EyeOff size={18} strokeWidth={1.5} /> : <Eye size={18} strokeWidth={1.5} />}
                           </button>
                           <button 
                             onClick={() => handleEditRecipe(recipe)}
-                            className="p-2 text-[#6B6658] hover:bg-[#F2EFE9] rounded-lg transition-colors"
-                            title="Bearbeiten"
+                            className="p-2 text-[#5C5748] hover:bg-[#F2EFE9] rounded-lg transition-colors"
+                            title="Edit"
                           >
                             <Edit3 size={18} strokeWidth={1.5} />
                           </button>
                           <button 
                             onClick={() => recipe.contentUrl && window.open(recipe.contentUrl, '_blank')}
                             disabled={!recipe.contentUrl}
-                            className={`p-2 rounded-lg transition-colors ${recipe.contentUrl ? 'text-[#6B6658] hover:bg-[#F2EFE9]' : 'text-[#E5E2D9] cursor-not-allowed'}`}
-                            title="PDF öffnen"
+                            className={`p-2 rounded-lg transition-colors ${recipe.contentUrl ? 'text-[#5C5748] hover:bg-[#F2EFE9]' : 'text-[#E5E2D9] cursor-not-allowed'}`}
+                            title="Open PDF"
                           >
                             <ExternalLink size={18} strokeWidth={1.5} />
                           </button>
                           <button 
                             onClick={() => handleDelete(recipe.id)}
                             className="p-2 text-[#E5E2D9] hover:text-red-400 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Löschen"
+                            title="Delete"
                           >
                             <Trash2 size={18} strokeWidth={1.5} />
                           </button>
@@ -397,26 +397,26 @@ export function Admin() {
 
             {/* Add Recipe Form */}
             <div id="add-recipe-modal" className="bg-white rounded-[2rem] shadow-sm border border-[#E5E2D9] p-10">
-              <h3 className="text-xl font-serif italic mb-8 text-[#2D2A26]">Neues Produkt hinzufügen</h3>
+              <h3 className="text-xl font-serif italic mb-8 text-[#1F1D1A]">New Product hinzufügen</h3>
               <form onSubmit={handleAddRecipe} className="grid grid-cols-1 md:grid-cols-2 gap-8" id="form-recipe">
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6658] mb-3">Titel</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-[#5C5748] mb-3">Title</label>
                   <input 
                     id="input-title"
                     required
                     type="text" 
                     value={newRecipe.title} 
                     onChange={e => setNewRecipe({ ...newRecipe, title: e.target.value })}
-                    className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#8A9A5B] transition-colors"
+                    className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#7A8F4E] transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6658] mb-3">Kategorie</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-[#5C5748] mb-3">Category</label>
                   <select 
                     id="select-category"
                     value={newRecipe.category} 
                     onChange={e => setNewRecipe({ ...newRecipe, category: e.target.value })}
-                    className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#8A9A5B] transition-colors"
+                    className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#7A8F4E] transition-colors"
                   >
                     <option>Lifestyle</option>
                     <option>Wellness</option>
@@ -426,17 +426,17 @@ export function Admin() {
                   </select>
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6658] mb-3">Beschreibung</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-[#5C5748] mb-3">Description</label>
                   <textarea 
                     id="input-description"
                     required
                     value={newRecipe.description} 
                     onChange={e => setNewRecipe({ ...newRecipe, description: e.target.value })}
-                    className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 h-32 text-sm focus:outline-none focus:border-[#8A9A5B] transition-colors"
+                    className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 h-32 text-sm focus:outline-none focus:border-[#7A8F4E] transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6658] mb-3">Preis (in €)</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-[#5C5748] mb-3">Price (in €)</label>
                   <input 
                     id="input-price"
                     required
@@ -445,22 +445,22 @@ export function Admin() {
                     placeholder="29.99"
                     value={newRecipe.price / 100 || ''} 
                     onChange={e => setNewRecipe({ ...newRecipe, price: Math.round(Number(e.target.value) * 100) })}
-                    className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#8A9A5B] transition-colors"
+                    className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#7A8F4E] transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6658] mb-3">Bild URL</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-[#5C5748] mb-3">Image URL</label>
                   <input 
                     id="input-imageUrl"
                     required
                     type="text" 
                     value={newRecipe.imageUrl} 
                     onChange={e => setNewRecipe({ ...newRecipe, imageUrl: e.target.value })}
-                    className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#8A9A5B] transition-colors"
+                    className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#7A8F4E] transition-colors"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6658] mb-3">PDF Inhalts-URL (Download-Link)</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-[#5C5748] mb-3">PDF Content URL (Download Link)</label>
                   <input 
                     id="input-contentUrl"
                     required
@@ -468,7 +468,7 @@ export function Admin() {
                     placeholder="https://deine-cloud.com/rezept.pdf"
                     value={newRecipe.contentUrl} 
                     onChange={e => setNewRecipe({ ...newRecipe, contentUrl: e.target.value })}
-                    className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#8A9A5B] transition-colors"
+                    className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#7A8F4E] transition-colors"
                   />
                 </div>
                 {/* Progress Bar & Animation when publishing */}
@@ -479,20 +479,20 @@ export function Admin() {
                     className="mb-6 p-4 bg-[#F2EFE9] border border-[#E5E2D9] rounded-xl"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold uppercase tracking-widest text-[#6B6658]">
-                        {publishStage || 'Verarbeitung...'}
+                      <span className="text-xs font-bold uppercase tracking-widest text-[#5C5748]">
+                        {publishStage || 'Processing...'}
                       </span>
-                      <span className="text-xs text-[#6B6658]">{publishProgress}%</span>
+                      <span className="text-xs text-[#5C5748]">{publishProgress}%</span>
                     </div>
                     <div className="w-full bg-[#E5E2D9] rounded-full h-2 overflow-hidden">
                       <motion.div
-                        className="h-full bg-[#8A9A5B]"
+                        className="h-full bg-[#7A8F4E]"
                         initial={{ width: 0 }}
                         animate={{ width: `${publishProgress}%` }}
                         transition={{ duration: 0.3, ease: 'easeOut' }}
                       />
                     </div>
-                    <div className="mt-2 flex items-center gap-2 text-xs text-[#6B6658]">
+                    <div className="mt-2 flex items-center gap-2 text-xs text-[#5C5748]">
                       <motion.div
                         animate={{ rotate: 360 }}
                         transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
@@ -513,8 +513,8 @@ export function Admin() {
                     disabled={isPublishing}
                     className={`w-full py-4 rounded-xl font-bold uppercase tracking-widest text-xs shadow-lg transition-all mt-4 ${
                       isPublishing
-                        ? 'bg-[#E5E2D9] text-[#6B6658] cursor-not-allowed'
-                        : 'bg-[#8A9A5B] text-white hover:bg-[#6B7A46] shadow-[#8A9A5B]/20'
+                        ? 'bg-[#E5E2D9] text-[#5C5748] cursor-not-allowed'
+                        : 'bg-[#7A8F4E] text-white hover:bg-[#6B7A46] shadow-[#7A8F4E]/20'
                     }`}
                   >
                     {isPublishing ? (
@@ -522,7 +522,7 @@ export function Admin() {
                         <motion.div
                           animate={{ rotate: 360 }}
                           transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
-                          className="w-4 h-4 border-2 border-[#6B6658] border-t-transparent rounded-full"
+                          className="w-4 h-4 border-2 border-[#5C5748] border-t-transparent rounded-full"
                         />
                         Veröffentliche...
                       </span>
@@ -536,10 +536,10 @@ export function Admin() {
           </div>
         ) : activeTab === 'orders' ? (
           <div id="order-management">
-            <h2 className="text-3xl font-serif italic text-[#2D2A26] mb-10">Bestellübersicht</h2>
+            <h2 className="text-3xl font-serif italic text-[#1F1D1A] mb-10">Bestellübersicht</h2>
             <div className="bg-white rounded-[2rem] shadow-sm border border-[#E5E2D9] overflow-hidden">
               <table className="w-full text-left" id="orders-table">
-                <thead className="bg-[#F2EFE9] border-b border-[#E5E2D9] uppercase text-[9px] font-bold tracking-[0.2em] text-[#6B6658]">
+                <thead className="bg-[#F2EFE9] border-b border-[#E5E2D9] uppercase text-[9px] font-bold tracking-[0.2em] text-[#5C5748]">
                   <tr>
                     <th className="p-6">Datum</th>
                     <th className="p-6">Nutzer ID</th>
@@ -550,17 +550,17 @@ export function Admin() {
                 <tbody className="divide-y divide-[#F2EFE9]">
                   {orders.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="p-12 text-center text-[#6B6658]">
-                        Keine Bestellungen vorhanden.
+                      <td colSpan={4} className="p-12 text-center text-[#5C5748]">
+                        Keine Orders vorhanden.
                       </td>
                     </tr>
                   ) : orders.map(order => (
                     <tr key={order.id} className="hover:bg-[#FAF9F6] transition-colors" data-order-id={order.id}>
-                      <td className="p-6 text-xs text-[#6B6658]">
+                      <td className="p-6 text-xs text-[#5C5748]">
                         {order.createdAt?.toDate?.()?.toLocaleDateString('de-DE') || 'N/A'}
                       </td>
-                      <td className="p-6 font-mono text-[10px] text-[#6B6658]">{order.userId}</td>
-                      <td className="p-6 font-bold text-[#2D2A26]">{(order.total / 100).toFixed(2)}€</td>
+                      <td className="p-6 font-mono text-[10px] text-[#5C5748]">{order.userId}</td>
+                      <td className="p-6 font-bold text-[#1F1D1A]">{(order.total / 100).toFixed(2)}€</td>
                       <td className="p-6 text-right">
                         <span className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest ${
                           order.status === 'completed' ? 'bg-[#D9DED1] text-green-800' : 'bg-[#F2EFE9] text-yellow-800'
@@ -576,8 +576,8 @@ export function Admin() {
           </div>
         ) : (
           <div id="system-status">
-            <h2 className="text-3xl font-serif italic text-[#2D2A26] mb-4">System & AI Integration</h2>
-            <p className="text-[#6B6658] mb-10 text-sm">Prüfe hier den Status deiner Drittanbieter-Anbindungen und AI-Schnittstellen.</p>
+            <h2 className="text-3xl font-serif italic text-[#1F1D1A] mb-4">System & AI Integration</h2>
+            <p className="text-[#5C5748] mb-10 text-sm">Prüfe hier den Status deiner Drittanbieter-Anbindungen und AI-Schnittstellen.</p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
               <StatusItem 
@@ -604,30 +604,30 @@ export function Admin() {
 
             <div className="bg-white rounded-[2rem] border border-[#E5E2D9] p-10 mb-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="px-3 py-1 bg-[#8A9A5B] text-white text-[10px] font-bold uppercase tracking-widest rounded-full">Test Mode</div>
-                <h3 className="text-xl font-serif italic text-[#2D2A26]">Kaufprozess-Simulator</h3>
+                <div className="px-3 py-1 bg-[#7A8F4E] text-white text-[10px] font-bold uppercase tracking-widest rounded-full">Test Mode</div>
+                <h3 className="text-xl font-serif italic text-[#1F1D1A]">Kaufprozess-Simulator</h3>
               </div>
-              <p className="text-sm text-[#6B6658] leading-relaxed mb-8">
+              <p className="text-sm text-[#5C5748] leading-relaxed mb-8">
                 Simuliere einen Kauf, um den Email-Versand und die Systemreaktion zu testen, ohne Stripe zu belasten.
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6658] mb-3">Empfänger Email</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-[#5C5748] mb-3">Empfänger Email</label>
                   <input 
                     type="email" 
                     value={simEmail}
                     onChange={e => setSimEmail(e.target.value)}
-                    className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#8A9A5B] transition-colors"
+                    className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#7A8F4E] transition-colors"
                     placeholder="deine@email.de"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6658] mb-3">Test-Rezept wählen</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-[#5C5748] mb-3">Test-Rezept wählen</label>
                   <select 
                     value={simRecipe}
                     onChange={e => setSimRecipe(e.target.value)}
-                    className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#8A9A5B] transition-colors"
+                    className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#7A8F4E] transition-colors"
                   >
                     {recipes.map(r => (
                       <option key={r.id} value={r.title}>{r.title}</option>
@@ -641,8 +641,8 @@ export function Admin() {
                     disabled={isSimulating || !configStatus?.resend}
                     className={`w-full py-4 rounded-xl font-bold uppercase tracking-widest text-xs shadow-lg transition-all ${
                       isSimulating || !configStatus?.resend
-                        ? 'bg-[#E5E2D9] text-[#6B6658] cursor-not-allowed'
-                        : 'bg-[#2D2A26] text-white hover:bg-black shadow-black/10'
+                        ? 'bg-[#E5E2D9] text-[#5C5748] cursor-not-allowed'
+                        : 'bg-[#1F1D1A] text-white hover:bg-black shadow-black/10'
                     }`}
                   >
                     {isSimulating ? 'Simuliere...' : 'Kauf simulieren & Email senden'}
@@ -657,11 +657,11 @@ export function Admin() {
             </div>
 
             <div className="bg-white rounded-[2rem] border border-[#E5E2D9] p-10">
-              <h3 className="text-xl font-serif italic mb-4 text-[#2D2A26]">AI Assistant Info</h3>
-              <p className="text-sm text-[#6B6658] leading-relaxed mb-6">
+              <h3 className="text-xl font-serif italic mb-4 text-[#1F1D1A]">AI Assistant Info</h3>
+              <p className="text-sm text-[#5C5748] leading-relaxed mb-6">
                 Dein Admin Panel ist für AI Assistants optimiert. Agents können Daten direkt über eine REST-API auslesen oder das UI aufgrund der semantischen IDs effizienter navigieren.
               </p>
-              <div className="bg-[#FAF9F6] p-4 rounded-xl border border-[#E5E2D9] font-mono text-[10px] text-[#2D2A26]">
+              <div className="bg-[#FAF9F6] p-4 rounded-xl border border-[#E5E2D9] font-mono text-[10px] text-[#1F1D1A]">
                 GET /api/admin/system-dump <br/>
                 Authorization: Bearer [VITE_ADMIN_API_KEY]
               </div>
@@ -675,10 +675,10 @@ export function Admin() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-[#E5E2D9] p-6 flex items-center justify-between">
-              <h3 className="text-xl font-serif italic text-[#2D2A26]">Produkt Bearbeiten</h3>
+              <h3 className="text-xl font-serif italic text-[#1F1D1A]">Produkt Edit</h3>
               <button 
                 onClick={() => { setEditModalOpen(false); setEditingRecipe(null); }}
-                className="p-2 text-[#6B6658] hover:bg-[#F2EFE9] rounded-full transition-colors"
+                className="p-2 text-[#5C5748] hover:bg-[#F2EFE9] rounded-full transition-colors"
               >
                 <X size={24} />
               </button>
@@ -686,20 +686,20 @@ export function Admin() {
             
             <form onSubmit={handleUpdateRecipe} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6658] mb-3">Titel</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#5C5748] mb-3">Title</label>
                 <input 
                   type="text" 
                   value={editingRecipe.title} 
                   onChange={e => setEditingRecipe({ ...editingRecipe, title: e.target.value })}
-                  className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#8A9A5B] transition-colors"
+                  className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#7A8F4E] transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6658] mb-3">Kategorie</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#5C5748] mb-3">Category</label>
                 <select 
                   value={editingRecipe.category} 
                   onChange={e => setEditingRecipe({ ...editingRecipe, category: e.target.value })}
-                  className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#8A9A5B] transition-colors"
+                  className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#7A8F4E] transition-colors"
                 >
                   <option>Lifestyle</option>
                   <option>Wellness</option>
@@ -709,38 +709,38 @@ export function Admin() {
                 </select>
               </div>
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6658] mb-3">Preis (in Cent)</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#5C5748] mb-3">Preis (in Cent)</label>
                 <input 
                   type="number" 
                   value={editingRecipe.price} 
                   onChange={e => setEditingRecipe({ ...editingRecipe, price: Number(e.target.value) })}
-                  className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#8A9A5B] transition-colors"
+                  className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#7A8F4E] transition-colors"
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6658] mb-3">Beschreibung</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#5C5748] mb-3">Description</label>
                 <textarea 
                   value={editingRecipe.description} 
                   onChange={e => setEditingRecipe({ ...editingRecipe, description: e.target.value })}
-                  className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 h-32 text-sm focus:outline-none focus:border-[#8A9A5B] transition-colors"
+                  className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 h-32 text-sm focus:outline-none focus:border-[#7A8F4E] transition-colors"
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6658] mb-3">Bild URL</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#5C5748] mb-3">Image URL</label>
                 <input 
                   type="text" 
                   value={editingRecipe.imageUrl} 
                   onChange={e => setEditingRecipe({ ...editingRecipe, imageUrl: e.target.value })}
-                  className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#8A9A5B] transition-colors"
+                  className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#7A8F4E] transition-colors"
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#6B6658] mb-3">PDF Inhalts-URL</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#5C5748] mb-3">PDF Inhalts-URL</label>
                 <input 
                   type="text" 
                   value={editingRecipe.contentUrl || ''} 
                   onChange={e => setEditingRecipe({ ...editingRecipe, contentUrl: e.target.value })}
-                  className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#8A9A5B] transition-colors"
+                  className="w-full bg-[#FAF9F6] border border-[#E5E2D9] rounded-xl p-4 text-sm focus:outline-none focus:border-[#7A8F4E] transition-colors"
                 />
               </div>
               <div className="md:col-span-2 flex items-center gap-4">
@@ -749,13 +749,13 @@ export function Admin() {
                     type="checkbox"
                     checked={editingRecipe.isOnline}
                     onChange={e => setEditingRecipe({ ...editingRecipe, isOnline: e.target.checked })}
-                    className="w-5 h-5 rounded border-[#E5E2D9] text-[#8A9A5B] focus:ring-[#8A9A5B]"
+                    className="w-5 h-5 rounded border-[#E5E2D9] text-[#7A8F4E] focus:ring-[#7A8F4E]"
                   />
-                  <span className="text-sm font-medium text-[#2D2A26]">Online sichtbar</span>
+                  <span className="text-sm font-medium text-[#1F1D1A]">Online sichtbar</span>
                 </label>
               </div>
               <div className="md:col-span-2">
-                <button type="submit" className="w-full bg-[#8A9A5B] text-white py-4 rounded-xl font-bold uppercase tracking-widest text-xs shadow-lg shadow-[#8A9A5B]/20 hover:bg-[#6B7A46] transition-all flex items-center justify-center gap-2">
+                <button type="submit" className="w-full bg-[#7A8F4E] text-white py-4 rounded-xl font-bold uppercase tracking-widest text-xs shadow-lg shadow-[#7A8F4E]/20 hover:bg-[#6B7A46] transition-all flex items-center justify-center gap-2">
                   <Save size={18} /> Änderungen Speichern
                 </button>
               </div>
