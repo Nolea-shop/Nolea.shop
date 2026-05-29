@@ -250,7 +250,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     ];
 
     // 4. Call OpenRouter
-    const model = 'openrouter/free';
+    const model = 'nvidia/nemotron-3-nano-30b-a3b:free';
     
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
