@@ -12,6 +12,7 @@ import { Cart } from './pages/Cart';
 import { Admin } from './pages/Admin';
 import { Success } from './pages/Success';
 import { Impressum } from './pages/Impressum';
+import { ChatAgent } from './components/ChatAgent';
 import { testConnection } from './lib/firebase';
 import { useUserSync } from './hooks/useUserSync';
 
@@ -44,6 +45,7 @@ function App() {
           </div>
           <Toaster position="bottom-right" />
           <CookieBanner />
+          <ChatAgent />
         </CategoryProvider>
       </CartProvider>
     </BrowserRouter>
