@@ -250,7 +250,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     ];
 
     // 4. Call OpenRouter
-    const model = 'google/gemma-4-26b-a4b-it:free';
+    const model = 'openrouter/free';
     
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
