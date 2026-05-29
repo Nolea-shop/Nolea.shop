@@ -129,7 +129,7 @@ export function ChatAgent() {
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-br from-[#8A9A5B] to-[#6B7A46] text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center"
         aria-label="AI Assistant öffnen"
       >
         {isOpen ? (
@@ -169,7 +169,7 @@ export function ChatAgent() {
       {isOpen && (
         <div className="fixed bottom-24 right-6 z-50 w-96 max-w-[calc(100vw-3rem)] bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
           {/* Header */}
-          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-4">
+          <div className="bg-gradient-to-r from-[#8A9A5B] to-[#6B7A46] text-white p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
                 <svg
@@ -204,7 +204,7 @@ export function ChatAgent() {
                 <div
                   className={`max-w-[80%] rounded-2xl px-4 py-2 ${
                     msg.role === 'user'
-                      ? 'bg-indigo-500 text-white'
+                      ? 'bg-[#8A9A5B] text-white'
                       : 'bg-white text-gray-800 shadow-sm border border-gray-100'
                   }`}
                 >
@@ -246,8 +246,8 @@ export function ChatAgent() {
 
           {/* Email Input (conditional) */}
           {showEmailInput && (
-            <div className="p-3 bg-indigo-50 border-t border-indigo-100">
-              <p className="text-xs text-indigo-700 mb-2">
+            <div className="p-3 bg-[#D9DED1] border-t border-[#8A9A5B]/30">
+              <p className="text-xs text-[#6B7A46] mb-2">
                 Damit wir dich kontaktieren können:
               </p>
               <div className="flex gap-2">
@@ -256,12 +256,12 @@ export function ChatAgent() {
                   value={customerEmail}
                   onChange={(e) => setCustomerEmail(e.target.value)}
                   placeholder="deine@email.de"
-                  className="flex-1 px-3 py-2 text-sm border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="flex-1 px-3 py-2 text-sm border border-[#8A9A5B]/40 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8A9A5B]"
                   onKeyPress={(e) => e.key === 'Enter' && handleEmailSubmit()}
                 />
                 <button
                   onClick={handleEmailSubmit}
-                  className="px-3 py-2 bg-indigo-500 text-white text-sm rounded-lg hover:bg-indigo-600"
+                  className="px-3 py-2 bg-[#8A9A5B] text-white text-sm rounded-lg hover:bg-[#6B7A46]"
                 >
                   OK
                 </button>
@@ -278,13 +278,13 @@ export function ChatAgent() {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Schreib eine Nachricht..."
-                className="flex-1 px-4 py-2 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-colors"
+                className="flex-1 px-4 py-2 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#8A9A5B] focus:bg-white transition-colors"
                 disabled={isLoading}
               />
               <button
                 onClick={sendMessage}
                 disabled={!inputValue.trim() || isLoading}
-                className="w-10 h-10 bg-indigo-500 text-white rounded-full flex items-center justify-center hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-10 h-10 bg-[#8A9A5B] text-white rounded-full flex items-center justify-center hover:bg-[#6B7A46] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
