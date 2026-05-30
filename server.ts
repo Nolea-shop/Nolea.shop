@@ -51,10 +51,10 @@ app.use((req, res, next) => {
 });
 
 // AI Assistant Helper API (for agents like Hermes or Openclaw)
-// Accessible via Bearer VITE_ADMIN_API_KEY
+// Accessible via Bearer ADMIN_API_KEY. Never expose this as a VITE_ variable.
 app.get('/api/admin/system-dump', (req, res) => {
   const authHeader = req.headers.authorization;
-  const adminKey = process.env.VITE_ADMIN_API_KEY;
+  const adminKey = process.env.ADMIN_API_KEY;
 
   if (!adminKey || authHeader !== `Bearer ${adminKey}`) {
     return res.status(401).json({ error: 'Unauthorized AI access' });
@@ -82,16 +82,17 @@ app.get('/api/admin/config-status', (req, res) => {
     stripe: !!process.env.STRIPE_SECRET_KEY,
     resend: !!process.env.RESEND_API_KEY,
     webhook: !!process.env.STRIPE_WEBHOOK_SECRET,
-    adminKey: !!process.env.VITE_ADMIN_API_KEY
+    adminKey: !!process.env.ADMIN_API_KEY
   });
 });
 
 // Simulation Mode Endpoint
 app.post('/api/admin/simulate-order', async (req, res) => {
-  const { recipeTitles, customerEmail, adminKey } = req.body;
-  const realAdminKey = process.env.VITE_ADMIN_API_KEY;
+  const { recipeTitles, customerEmail } = req.body;
+  const authHeader = req.headers.authorization;
+  const realAdminKey = process.env.ADMIN_API_KEY;
 
-  if (!realAdminKey || adminKey !== realAdminKey) {
+  if (process.env.NODE_ENV === 'production' && (!realAdminKey || authHeader !== `Bearer ${realAdminKey}`)) {
     return res.status(401).json({ error: 'Unauthorized simulation' });
   }
 

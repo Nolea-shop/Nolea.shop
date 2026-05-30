@@ -1,22 +1,36 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
+import {
+  applyCors,
+  endPreflight,
+  extractPdfFilename,
+  isSafePdfFilename,
+  isValidStripeSessionId,
+  requireMethod,
+} from './_security';
 
 /**
  * Secure PDF proxy — validates Stripe session, streams PDF from Supabase.
  * Browser never sees the Supabase Storage URL.
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  applyCors(req, res, ['GET']);
 
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+  if (endPreflight(req, res)) return;
+  if (!requireMethod(req, res, 'GET')) return;
 
   const sessionId = req.query.session_id as string;
   const product = req.query.product as string;
 
   if (!sessionId) {
     return res.status(400).json({ error: 'session_id is required' });
+  }
+
+  if (!isValidStripeSessionId(sessionId)) {
+    return res.status(400).json({ error: 'Invalid session_id' });
+  }
+
+  if (product && !isSafePdfFilename(product)) {
+    return res.status(400).json({ error: 'Invalid product' });
   }
 
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
@@ -34,16 +48,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(403).json({ error: 'Payment not completed' });
     }
 
+    const EXPIRY = 7 * 24 * 60 * 60; // 7 Tage
+    const sessionCreated = typeof (session as any).created === 'number' ? (session as any).created : 0;
+    if (!sessionCreated || Date.now() / 1000 - sessionCreated > EXPIRY) {
+      return res.status(403).json({ error: 'Download window expired' });
+    }
+
     // 2. Dateiname aus Metadaten extrahieren
     const contentUrls = ((session as any).metadata?.contentUrls || '') as string;
     const filenames = contentUrls
       .split(',')
       .map((f: string) => f.trim())
       .filter(Boolean)
-      .map((f: string) => {
-        const cleaned = decodeURIComponent(f.split('?')[0]).split('/').pop() || '';
-        return cleaned.toLowerCase().endsWith('.pdf') ? cleaned : null;
-      })
+      .map((f: string) => extractPdfFilename(f))
       .filter(Boolean) as string[];
 
     if (filenames.length === 0) {
@@ -51,7 +68,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // 3. Gewünschte Datei auswählen (oder erste)
-    const filename = product && product.endsWith('.pdf') ? product : filenames[0];
+    const filename = product && isSafePdfFilename(product) ? product : filenames[0];
 
     // Sicherheitscheck: Darf der User diese Datei runterladen?
     if (!filenames.includes(filename)) {
@@ -59,7 +76,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // 4. PDF von Supabase Public Storage abholen
-    const supabaseUrl = process.env.SUPABASE_URL || 'https://mmlqyzcowrckhtaaqzvz.supabase.co';
+    const supabaseUrl = (process.env.SUPABASE_URL || 'https://mmlqyzcowrckhtaaqzvz.supabase.co').replace(/\/+$/, '');
     const bucket = 'pdfs';
     const pdfUrl = `${supabaseUrl}/storage/v1/object/public/${bucket}/${encodeURIComponent(filename)}`;
 
