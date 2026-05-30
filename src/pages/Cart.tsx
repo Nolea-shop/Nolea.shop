@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
-import { Trash2, ArrowLeft, ArrowRight, CreditCard, ShoppingBag, ShieldCheck, Lock, RefreshCw } from 'lucide-react';
+import { Trash2, ArrowLeft, ArrowRight, CreditCard, ShoppingBag, ShieldCheck, Lock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { auth } from '../lib/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -87,7 +87,6 @@ export function Cart() {
           {[
             { icon: Lock, text: 'Secure Checkout' },
             { icon: ShieldCheck, text: 'Buyer Protection' },
-            { icon: RefreshCw, text: '30-Day Returns' },
           ].map((badge, index) => (
             <div
               key={index}

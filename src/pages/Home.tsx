@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import { ArrowRight, Sparkles, Heart, Leaf, ShieldCheck, Zap, Lock } from 'lucide-react';
+import { ArrowRight, Sparkles, Heart, Leaf, Zap, Lock } from 'lucide-react';
 import { RecipeCard } from '../components/RecipeCard';
 import { getAllRecipes } from '../services/recipeService';
 import { Recipe } from '../types';
@@ -195,7 +195,6 @@ export function Home() {
             {[
               { text: 'SSL Encrypted', icon: Lock },
               { text: 'Instant Access', icon: Zap },
-              { text: '30-Day Returns', icon: ShieldCheck },
             ].map((item) => (
               <div
                 key={item.text}
