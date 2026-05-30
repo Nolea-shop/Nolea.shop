@@ -11,7 +11,7 @@ export function ChatAgent() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: 'Hey! 👋 Ich bin der Nolea Assistant. Wie kann ich dir helfen? Frage mich gerne zu unseren Produkten oder wenn du Unterstützung brauchst.',
+      content: 'Hey! 👋 I\'m the Nolea Assistant. How can I help you? Feel free to ask about our products or if you need any support.',
       timestamp: new Date(),
     },
   ]);
@@ -70,7 +70,7 @@ export function ChatAgent() {
         if (data.emailSent) {
           const emailConfirm: Message = {
             role: 'assistant',
-            content: '✅ Ich habe deine Anfrage an unser Support-Team weitergeleitet. Du erhältst in Kürze eine E-Mail von uns.',
+            content: '✅ I\'ve forwarded your request to our support team. You\'ll receive an email from us shortly.',
             timestamp: new Date(),
           };
           setMessages((prev) => [...prev, emailConfirm]);
@@ -86,7 +86,7 @@ export function ChatAgent() {
       } else {
         const errorMessage: Message = {
           role: 'assistant',
-          content: 'Entschuldige, es ist ein Fehler aufgetreten. Bitte versuche es später erneut.',
+          content: 'Sorry, an error occurred. Please try again later.',
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, errorMessage]);
@@ -94,7 +94,7 @@ export function ChatAgent() {
     } catch (error) {
       const errorMessage: Message = {
         role: 'assistant',
-        content: 'Verbindungsfehler. Bitte überprüfe deine Internetverbindung.',
+        content: 'Connection error. Please check your internet connection.',
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
@@ -115,12 +115,12 @@ export function ChatAgent() {
       setShowEmailInput(false);
       const emailMessage: Message = {
         role: 'user',
-        content: `Meine E-Mail-Adresse ist: ${customerEmail}`,
+        content: `My email address is: ${customerEmail}`,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, emailMessage]);
       // Auto-send the email request
-      setInputValue('Bitte leite mein Anliegen an das Support-Team weiter.');
+      setInputValue('Please forward my request to the support team.');
     }
   };
 
@@ -130,7 +130,7 @@ export function ChatAgent() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-br from-[#8A9A5B] to-[#6B7A46] text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center"
-        aria-label="AI Assistant öffnen"
+        aria-label="Open AI Assistant"
       >
         {isOpen ? (
           <svg
@@ -189,7 +189,7 @@ export function ChatAgent() {
               </div>
               <div>
                 <h3 className="font-semibold">Nolea Assistant</h3>
-                <p className="text-xs text-white/80">Immer für dich da 💜</p>
+                <p className="text-xs text-white/80">Always here to help 💜</p>
               </div>
             </div>
           </div>
@@ -248,7 +248,7 @@ export function ChatAgent() {
           {showEmailInput && (
             <div className="p-3 bg-[#D9DED1] border-t border-[#8A9A5B]/30">
               <p className="text-xs text-[#6B7A46] mb-2">
-                Damit wir dich kontaktieren können:
+                So we can contact you:
               </p>
               <div className="flex gap-2">
                 <input
@@ -277,7 +277,7 @@ export function ChatAgent() {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Schreib eine Nachricht..."
+                placeholder="Type a message..."
                 className="flex-1 px-4 py-2 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#8A9A5B] focus:bg-white transition-colors"
                 disabled={isLoading}
               />
