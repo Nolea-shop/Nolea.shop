@@ -391,11 +391,17 @@ export function Footer() {
               Support
             </h4>
             <ul className="flex flex-col gap-2.5 md:gap-3 text-sm">
-              {['Legal Notice', 'Privacy Policy', 'Terms of Service', 'Contact'].map(
-                (item) => (
-                  <li key={item}>
-                    <span
-                      className="cursor-pointer transition-colors duration-500 hover:opacity-100"
+              {[
+                { label: 'Legal Notice', to: '/impressum' },
+                { label: 'Privacy Policy', to: '#' },
+                { label: 'Terms of Service', to: '#' },
+                { label: 'Contact', href: 'mailto:noleashop@gmail.com' },
+              ].map((item) => (
+                <li key={item.label}>
+                  {item.href ? (
+                    <a
+                      href={item.href}
+                      className="transition-colors duration-500 hover:opacity-100"
                       style={{ color: activeColors.text, opacity: 0.6 }}
                       onMouseEnter={(e) => {
                         (e.target as HTMLElement).style.color = activeColors.accent;
@@ -406,11 +412,27 @@ export function Footer() {
                         (e.target as HTMLElement).style.opacity = '0.6';
                       }}
                     >
-                      {item}
-                    </span>
-                  </li>
-                )
-              )}
+                      {item.label}
+                    </a>
+                  ) : (
+                    <Link
+                      to={item.to}
+                      className="transition-colors duration-500 hover:opacity-100"
+                      style={{ color: activeColors.text, opacity: 0.6 }}
+                      onMouseEnter={(e) => {
+                        (e.target as HTMLElement).style.color = activeColors.accent;
+                        (e.target as HTMLElement).style.opacity = '1';
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.target as HTMLElement).style.color = activeColors.text;
+                        (e.target as HTMLElement).style.opacity = '0.6';
+                      }}
+                    >
+                      {item.label}
+                    </Link>
+                  )}
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -477,13 +499,6 @@ export function Footer() {
                 <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
               Secure Payment
-            </span>
-            <span className="flex items-center gap-1.5">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 6v6l4 2" />
-              </svg>
-              30-Day Returns
             </span>
           </div>
         </div>
