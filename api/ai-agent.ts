@@ -161,7 +161,7 @@ async function sendSupportEmail(
     return false;
   }
 
-  const supportEmail = 'julian.damian.meme.shop@gmail.com';
+  const supportEmail = 'noleashop@gmail.com';
   
   // Build conversation summary for the support team
   const conversationSummary = conversationHistory
