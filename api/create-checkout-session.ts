@@ -1,40 +1,33 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import admin from 'firebase-admin';
-import {
-  applyCors,
-  endPreflight,
-  isValidEmail,
-  rejectLargeRequest,
-  requireMethod,
-} from './_security';
 
 // Initialize Firebase Admin if not already initialized
 function initFirebase() {
   if (admin.apps.length) return;
-  // Try base64-encoded key first (avoids Vercel newline escaping issues)
   const b64Key = process.env.FIREBASE_SERVICE_ACCOUNT_KEY_B64 || process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '';
+  if (!b64Key) {
+    throw new Error('FIREBASE_SERVICE_ACCOUNT_KEY_B64 not configured');
+  }
   try {
     const json = Buffer.from(b64Key, 'base64').toString('utf8');
     admin.initializeApp({
       credential: admin.credential.cert(JSON.parse(json)),
       projectId: 'gen-lang-client-0195318958'
     });
-    return;
-  } catch {
+  } catch (e) {
     // Fallback: try direct JSON parse
     try {
       admin.initializeApp({
         credential: admin.credential.cert(JSON.parse(b64Key)),
         projectId: 'gen-lang-client-0195318958'
       });
-      return;
     } catch {
       throw new Error('Failed to initialize Firebase: invalid FIREBASE_SERVICE_ACCOUNT_KEY_B64');
     }
   }
 }
 
-// Lazy init: only initialize when handler is called, not at module level
+// Lazy init
 let db: FirebaseFirestore.Firestore | null = null;
 function getDb() {
   if (!db) {
@@ -45,18 +38,24 @@ function getDb() {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  applyCors(req, res, ['POST']);
-  if (endPreflight(req, res)) return;
-  if (!requireMethod(req, res, 'POST')) return;
-  if (rejectLargeRequest(req, res, 64 * 1024)) return;
+  // CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
   if (!stripeSecretKey) {
     return res.status(500).json({ error: 'Stripe not configured' });
   }
 
-  // Highly End: Validate prices server-side against Firestore
-  // userId und userEmail sind optional — bei Gast-Checkout kann beides null sein
   const { items: clientItems, userId, userEmail } = req.body;
 
   if (!Array.isArray(clientItems) || !clientItems.length) {
@@ -67,63 +66,51 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Too many items in cart' });
   }
 
-  if (userEmail && !isValidEmail(userEmail)) {
-    return res.status(400).json({ error: 'Invalid customer email' });
-  }
-
-  if (userId && (typeof userId !== 'string' || userId.length > 128)) {
-    return res.status(400).json({ error: 'Invalid user id' });
-  }
-
   const APP_URL = process.env.APP_URL || 'https://www.nolea.shop';
 
   try {
     // Validate each item against Firestore — never trust client prices
     const validatedItems = [];
     for (const item of clientItems) {
-      if (!item || typeof item.id !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(item.id)) {
+      if (!item || typeof item.id !== 'string') {
         return res.status(400).json({ error: 'Invalid cart item' });
       }
 
       const recipeDoc = await getDb().collection('recipes').doc(item.id).get();
       if (!recipeDoc.exists) {
-        return res.status(400).json({ error: 'Product not found' });
+        return res.status(400).json({ error: `Product ${item.id} not found` });
       }
       const actualData = recipeDoc.data();
       if (!actualData?.isOnline) {
-        return res.status(400).json({ error: 'Product is currently unavailable' });
+        return res.status(400).json({ error: `Product ${item.id} is currently unavailable` });
       }
       
       validatedItems.push({
         id: item.id,
         title: actualData.title,
-        price: actualData.price, // In cents — from DB, not from client
+        price: actualData.price,
         imageUrl: actualData.imageUrl,
         contentUrl: actualData.contentUrl || '',
         authorId: actualData.authorId || 'admin',
       });
     }
 
-    // Dynamic import stripe (Vercel Functions bundle no node_modules directly)
+    // Dynamic import stripe
     const Stripe = (await import('stripe')).default;
     const stripe = new Stripe(stripeSecretKey, { apiVersion: '2026-04-22.dahlia' as any });
 
-    // Metadata: userId nur setzen, wenn ein eingeloggter Benutzer vorhanden ist
-    // Bei Gast-Checkout (userId = null) entf\u00e4llt userId aus metadata
     const metadata: Record<string, string> = {
       recipeIds: validatedItems.map((i: any) => i.id).join(','),
       recipeTitles: validatedItems.map((i: any) => i.title).join(', '),
       contentUrls: validatedItems.map((i: any) => i.contentUrl || '').filter(Boolean).join(','),
-      // High-End: Pass author info for potential split payments
       authorIds: validatedItems.map((i: any) => i.authorId || 'admin').join(','),
     };
     if (userId) metadata.userId = userId;
 
-    // Stripe erwartet undefined statt null f\u00fcr customer_email bei G\u00e4sten
     const customerEmail = userEmail || undefined;
 
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'], // TEMP: 'paypal' removed — nicht im Stripe-Dashboard aktiviert (2026-05-25). Bei Bedarf wieder hinzufügen + Dashboard aktivieren.
+      payment_method_types: ['card'],
       line_items: validatedItems.map((item: any) => ({
         price_data: {
           currency: 'eur',
@@ -131,7 +118,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             name: item.title,
             images: item.imageUrl && item.imageUrl.startsWith('http') ? [item.imageUrl] : [],
           },
-          unit_amount: Math.round(item.price), // Price in cents — from DB
+          unit_amount: Math.round(item.price),
         },
         quantity: 1,
       })),
