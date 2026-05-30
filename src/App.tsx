@@ -12,6 +12,8 @@ import { Cart } from './pages/Cart';
 import { Admin } from './pages/Admin';
 import { Success } from './pages/Success';
 import { Impressum } from './pages/Impressum';
+import { PrivacyPolicy } from './pages/PrivacyPolicy';
+import { TermsOfService } from './pages/TermsOfService';
 import { ChatAgent } from './components/ChatAgent';
 import { testConnection } from './lib/firebase';
 import { useUserSync } from './hooks/useUserSync';
@@ -37,6 +39,8 @@ function App() {
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/success" element={<Success />} />
                 <Route path="/impressum" element={<Impressum />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/terms" element={<TermsOfService />} />
                 {/* Fallback */}
                 <Route path="*" element={<Home />} />
               </Routes>

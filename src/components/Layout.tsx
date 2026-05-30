@@ -393,8 +393,8 @@ export function Footer() {
             <ul className="flex flex-col gap-2.5 md:gap-3 text-sm">
               {[
                 { label: 'Legal Notice', to: '/impressum' },
-                { label: 'Privacy Policy', to: '#' },
-                { label: 'Terms of Service', to: '#' },
+                { label: 'Privacy Policy', to: '/privacy' },
+                { label: 'Terms of Service', to: '/terms' },
                 { label: 'Contact', href: 'mailto:noleashop@gmail.com' },
               ].map((item) => (
                 <li key={item.label}>
