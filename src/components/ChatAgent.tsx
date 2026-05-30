@@ -129,7 +129,7 @@ export function ChatAgent() {
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-br from-[#8A9A5B] to-[#6B7A46] text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center"
+        className="fixed bottom-24 md:bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-br from-[#8A9A5B] to-[#6B7A46] text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center"
         aria-label="Open AI Assistant"
       >
         {isOpen ? (
@@ -167,7 +167,7 @@ export function ChatAgent() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-96 max-w-[calc(100vw-3rem)] bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
+        <div className="fixed bottom-36 md:bottom-24 right-6 z-50 w-96 max-w-[calc(100vw-3rem)] bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-to-r from-[#8A9A5B] to-[#6B7A46] text-white p-4">
             <div className="flex items-center gap-3">
