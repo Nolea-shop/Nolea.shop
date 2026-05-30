@@ -34,9 +34,15 @@ function initFirebase() {
   }
 }
 
-initFirebase();
-
-const db = admin.firestore();
+// Lazy init: only initialize when handler is called, not at module level
+let db: FirebaseFirestore.Firestore | null = null;
+function getDb() {
+  if (!db) {
+    initFirebase();
+    db = admin.firestore();
+  }
+  return db;
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   applyCors(req, res, ['POST']);
@@ -79,7 +85,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(400).json({ error: 'Invalid cart item' });
       }
 
-      const recipeDoc = await db.collection('recipes').doc(item.id).get();
+      const recipeDoc = await getDb().collection('recipes').doc(item.id).get();
       if (!recipeDoc.exists) {
         return res.status(400).json({ error: 'Product not found' });
       }
