@@ -1,4 +1,11 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
+import {
+  applyCors,
+  endPreflight,
+  extractPdfFilename,
+  isValidStripeSessionId,
+  requireMethod,
+} from './_security';
 
 /**
  * Returns download links for a given Stripe session ID.
@@ -6,15 +13,14 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
  * Links expire after 7 days.
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  applyCors(req, res, ['GET']);
 
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+  if (endPreflight(req, res)) return;
+  if (!requireMethod(req, res, 'GET')) return;
 
   const sessionId = req.query.session_id as string;
   if (!sessionId) return res.status(400).json({ error: 'session_id is required' });
+  if (!isValidStripeSessionId(sessionId)) return res.status(400).json({ error: 'Invalid session_id' });
 
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
   if (!stripeSecretKey) return res.status(500).json({ error: 'Stripe not configured' });
@@ -28,19 +34,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(403).json({ error: 'Payment not completed' });
     }
 
+    const EXPIRY = 7 * 24 * 60 * 60; // 7 Tage
+    const sessionCreated = typeof (session as any).created === 'number' ? (session as any).created : 0;
+    if (!sessionCreated || Date.now() / 1000 - sessionCreated > EXPIRY) {
+      return res.status(403).json({ error: 'Download window expired' });
+    }
+
     const contentUrls = (session as any).metadata?.contentUrls || '';
     const filenames = contentUrls.split(',').map((f: string) => f.trim()).filter(Boolean);
 
-    function extractFilename(input: string): string | null {
-      const lastSegment = decodeURIComponent(input.split('?')[0]).split('/').pop() || '';
-      return lastSegment.toLowerCase().endsWith('.pdf') ? lastSegment : null;
-    }
-
-    const EXPIRY = 7 * 24 * 60 * 60; // 7 Tage
     const downloadLinks: { url: string; title: string; expiresAt: string }[] = [];
 
     for (const raw of filenames) {
-      const fn = extractFilename(raw);
+      const fn = extractPdfFilename(raw);
       if (!fn) continue;
       downloadLinks.push({
         title: fn.replace('.pdf', ''),
@@ -52,11 +58,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({
       success: true,
       orderId: sessionId,
-      customerEmail: (session as any).customer_details?.email || '',
       downloadLinks,
     });
   } catch (error: any) {
-    console.error('Error:', error);
+    console.error('Download link lookup failed:', error?.message || error);
     return res.status(404).json({ error: 'Session not found' });
   }
 }

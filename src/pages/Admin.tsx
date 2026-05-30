@@ -42,6 +42,23 @@ export function Admin() {
   const isAdmin = user?.email === 'julianlegendstar@gmail.com';
   const isCreator = !!user;
 
+  const fetchAdminConfigStatus = async () => {
+    if (!user || !isAdmin) return null;
+
+    const token = await user.getIdToken();
+    const response = await fetch('/api/admin/config-status', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Config status unavailable');
+    }
+
+    return response.json();
+  };
+
   const loadData = async () => {
     if (!user) return;
     try {
@@ -49,7 +66,7 @@ export function Admin() {
       const [r, o, config] = await Promise.all([
         isActualAdmin ? getAdminRecipes() : getCreatorRecipes(user.uid), 
         isActualAdmin ? getAllOrders() : getUserOrders(user.uid),
-        fetch('/api/admin/config-status').then(res => res.json())
+        fetchAdminConfigStatus()
       ]);
       setRecipes(r);
       setOrders(o);
@@ -68,16 +85,20 @@ export function Admin() {
 
   const handleSimulatePurchase = async () => {
     if (!simEmail) return toast.error('Please enter an email');
+    if (!user) return toast.error('Please sign in again');
     
     setIsSimulating(true);
     try {
+      const token = await user.getIdToken();
       const response = await fetch('/api/admin/simulate-order', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           recipeTitles: simRecipe,
           customerEmail: simEmail,
-          adminKey: 'SIMULATION_MODE' // Hardcoded client key is irrelevant, check should be in backend
         })
       });
 
@@ -582,22 +603,22 @@ export function Admin() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
               <StatusItem 
                 label="Stripe Integration"
-                isOk={!!configStatus?.stripe}
+                isOk={!!configStatus?.services?.stripe}
                 description="Ermöglicht sichere Zahlungen via Kreditkarte und PayPal. Notwendig für den Checkout."
               />
               <StatusItem 
                 label="Resend Email Service"
-                isOk={!!configStatus?.resend}
+                isOk={!!configStatus?.services?.resend}
                 description="Automatisiert den Versand der PDF-Downloadlinks nach erfolgreicher Zahlung."
               />
               <StatusItem 
                 label="Stripe Webhook"
-                isOk={!!configStatus?.webhook}
+                isOk={!!configStatus?.services?.webhook}
                 description="Überwacht Zahlungsereignisse, um die PDF-Zustellung sofort auszulösen."
               />
               <StatusItem 
                 label="AI Agent Access"
-                isOk={!!configStatus?.adminKey}
+                isOk={!!configStatus?.services?.systemDump}
                 description="Erlaubt KI-Assistenten wie Hermes oder Openclaw den Zugriff auf Management-Daten über den API-Endpunkt /api/admin/system-dump."
               />
             </div>
@@ -638,16 +659,16 @@ export function Admin() {
                 <div className="md:col-span-2">
                   <button 
                     onClick={handleSimulatePurchase}
-                    disabled={isSimulating || !configStatus?.resend}
+                    disabled={isSimulating || !configStatus?.services?.resend}
                     className={`w-full py-4 rounded-xl font-bold uppercase tracking-widest text-xs shadow-lg transition-all ${
-                      isSimulating || !configStatus?.resend
+                      isSimulating || !configStatus?.services?.resend
                         ? 'bg-[#E5E2D9] text-[#5C5748] cursor-not-allowed'
                         : 'bg-[#1F1D1A] text-white hover:bg-black shadow-black/10'
                     }`}
                   >
                     {isSimulating ? 'Simuliere...' : 'Kauf simulieren & Email senden'}
                   </button>
-                  {!configStatus?.resend && (
+                  {!configStatus?.services?.resend && (
                     <p className="text-[10px] text-red-400 mt-2 text-center uppercase tracking-widest">
                       Resend API Key fehlt - Simulation deaktiviert
                     </p>
@@ -663,7 +684,7 @@ export function Admin() {
               </p>
               <div className="bg-[#FAF9F6] p-4 rounded-xl border border-[#E5E2D9] font-mono text-[10px] text-[#1F1D1A]">
                 GET /api/admin/system-dump <br/>
-                Authorization: Bearer [VITE_ADMIN_API_KEY]
+                Authorization: Bearer [ADMIN_API_KEY]
               </div>
             </div>
           </div>

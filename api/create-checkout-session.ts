@@ -1,5 +1,12 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import admin from 'firebase-admin';
+import {
+  applyCors,
+  endPreflight,
+  isValidEmail,
+  rejectLargeRequest,
+  requireMethod,
+} from './_security';
 
 // Initialize Firebase Admin if not already initialized
 function initFirebase() {
@@ -32,26 +39,10 @@ initFirebase();
 const db = admin.firestore();
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS headers - secure to main domain
-  const allowedOrigins = ['https://www.nolea.shop', 'https://nolea.shop'];
-  const origin = req.headers.origin;
-  
-  if (origin && allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  } else if (!origin && process.env.NODE_ENV === 'development') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-  }
-  
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  applyCors(req, res, ['POST']);
+  if (endPreflight(req, res)) return;
+  if (!requireMethod(req, res, 'POST')) return;
+  if (rejectLargeRequest(req, res, 64 * 1024)) return;
 
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
   if (!stripeSecretKey) {
@@ -62,8 +53,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // userId und userEmail sind optional — bei Gast-Checkout kann beides null sein
   const { items: clientItems, userId, userEmail } = req.body;
 
-  if (!clientItems || !clientItems.length) {
+  if (!Array.isArray(clientItems) || !clientItems.length) {
     return res.status(400).json({ error: 'No items in cart' });
+  }
+
+  if (clientItems.length > 20) {
+    return res.status(400).json({ error: 'Too many items in cart' });
+  }
+
+  if (userEmail && !isValidEmail(userEmail)) {
+    return res.status(400).json({ error: 'Invalid customer email' });
+  }
+
+  if (userId && (typeof userId !== 'string' || userId.length > 128)) {
+    return res.status(400).json({ error: 'Invalid user id' });
   }
 
   const APP_URL = process.env.APP_URL || 'https://www.nolea.shop';
@@ -72,13 +75,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Validate each item against Firestore — never trust client prices
     const validatedItems = [];
     for (const item of clientItems) {
+      if (!item || typeof item.id !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(item.id)) {
+        return res.status(400).json({ error: 'Invalid cart item' });
+      }
+
       const recipeDoc = await db.collection('recipes').doc(item.id).get();
       if (!recipeDoc.exists) {
-        throw new Error(`Produkt ${item.title} nicht gefunden.`);
+        return res.status(400).json({ error: 'Product not found' });
       }
       const actualData = recipeDoc.data();
       if (!actualData?.isOnline) {
-        throw new Error(`Produkt ${item.title} ist momentan nicht verf\u00fcgbar.`);
+        return res.status(400).json({ error: 'Product is currently unavailable' });
       }
       
       validatedItems.push({
@@ -131,7 +138,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     return res.status(200).json({ id: session.id, url: session.url });
   } catch (error: any) {
-    console.error('Checkout error:', error);
-    return res.status(500).json({ error: error.message });
+    console.error('Checkout error:', error?.message || error);
+    return res.status(500).json({ error: 'Checkout failed' });
   }
 }
