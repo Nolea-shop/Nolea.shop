@@ -8,6 +8,69 @@ import {
   requireMethod,
 } from './_security';
 
+const DEFAULT_PDF_BUCKET = 'pdfs';
+const STORAGE_BUCKET_PATTERN = /^[a-zA-Z0-9._-]{1,100}$/;
+
+type SupabaseObjectRequest = {
+  url: string;
+  headers: Record<string, string>;
+  mode: 'private' | 'public-fallback';
+};
+
+function getSupabaseBaseUrl() {
+  const rawUrl = process.env.SUPABASE_URL?.trim();
+  if (!rawUrl) return null;
+
+  try {
+    const url = new URL(rawUrl);
+    if (process.env.NODE_ENV === 'production' && url.protocol !== 'https:') {
+      return null;
+    }
+
+    url.pathname = '';
+    url.search = '';
+    url.hash = '';
+    return url.toString().replace(/\/+$/, '');
+  } catch {
+    return null;
+  }
+}
+
+function getSupabasePdfBucket() {
+  const bucket = (process.env.SUPABASE_PDF_BUCKET || DEFAULT_PDF_BUCKET).trim();
+  return STORAGE_BUCKET_PATTERN.test(bucket) ? bucket : null;
+}
+
+function getSupabaseObjectRequest(
+  supabaseUrl: string,
+  bucket: string,
+  filename: string
+): SupabaseObjectRequest | null {
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
+  const objectPath = `${encodeURIComponent(bucket)}/${encodeURIComponent(filename)}`;
+
+  if (serviceKey) {
+    return {
+      url: `${supabaseUrl}/storage/v1/object/authenticated/${objectPath}`,
+      headers: {
+        Authorization: `Bearer ${serviceKey}`,
+        apikey: serviceKey,
+      },
+      mode: 'private',
+    };
+  }
+
+  if (process.env.SUPABASE_ALLOW_PUBLIC_PDF_FALLBACK === 'true') {
+    return {
+      url: `${supabaseUrl}/storage/v1/object/public/${objectPath}`,
+      headers: {},
+      mode: 'public-fallback',
+    };
+  }
+
+  return null;
+}
+
 /**
  * Secure PDF proxy — validates Stripe session, streams PDF from Supabase.
  * Browser never sees the Supabase Storage URL.
@@ -75,14 +138,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(403).json({ error: 'Product not in your purchase' });
     }
 
-    // 4. PDF von Supabase Public Storage abholen
-    const supabaseUrl = (process.env.SUPABASE_URL || 'https://mmlqyzcowrckhtaaqzvz.supabase.co').replace(/\/+$/, '');
-    const bucket = 'pdfs';
-    const pdfUrl = `${supabaseUrl}/storage/v1/object/public/${bucket}/${encodeURIComponent(filename)}`;
+    // 4. PDF aus Supabase Storage abholen. Default is private-bucket access.
+    const supabaseUrl = getSupabaseBaseUrl();
+    const bucket = getSupabasePdfBucket();
+    if (!supabaseUrl || !bucket) {
+      console.error('Supabase download storage environment is invalid or missing');
+      return res.status(500).json({ error: 'Download storage not configured' });
+    }
 
-    const pdfRes = await fetch(pdfUrl);
+    const storageRequest = getSupabaseObjectRequest(supabaseUrl, bucket, filename);
+
+    if (!storageRequest) {
+      console.error('Supabase private storage is not configured');
+      return res.status(500).json({ error: 'Download storage not configured' });
+    }
+
+    const pdfRes = await fetch(storageRequest.url, {
+      headers: storageRequest.headers,
+    });
     if (!pdfRes.ok) {
-      console.error(`Supabase error ${pdfRes.status} for ${filename}`);
+      console.error(`Supabase ${storageRequest.mode} download failed with status ${pdfRes.status}`);
       return res.status(502).json({ error: 'Failed to load PDF' });
     }
 

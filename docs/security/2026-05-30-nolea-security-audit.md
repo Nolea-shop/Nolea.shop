@@ -10,7 +10,7 @@ Top risks found:
 2. Public config-status endpoint exposed integration state and used wildcard CORS in production.
 3. Multiple API routes and `vercel.json` emitted `Access-Control-Allow-Origin: *`.
 4. Download links relied on a Stripe session id as a bearer secret and returned buyer email.
-5. Supabase `pdfs` delivery still depends on a public bucket URL behind the API proxy.
+5. Supabase `pdfs` delivery previously depended on a public bucket URL behind the API proxy.
 6. Firebase Storage rules allowed public reads for every object and writes by any signed-in user.
 7. AI chat accepted client-supplied message history roles, including possible injected `system` messages.
 8. API routes lacked request-size checks and returned raw internal errors in some cases.
@@ -29,7 +29,7 @@ Main trust boundaries:
 - Browser to Vercel API routes: cart, checkout, AI chat, admin utilities, and download links.
 - Vercel functions to Stripe: checkout session creation and paid-session verification.
 - Vercel functions to Firebase Admin / Firestore: product lookup, order writes, admin checks.
-- Vercel functions to Supabase public storage: PDF fetch by metadata-derived filename.
+- Vercel functions to Supabase private storage: authenticated server-side PDF fetch by metadata-derived filename.
 - Stripe to Vercel webhook routes: signed event ingestion.
 - GitHub to Vercel deployment: default branch auto-deploy.
 
@@ -88,14 +88,14 @@ No active production exploitation, load testing, destructive testing, or cloud m
 - Affected paths: `api/download-links.ts`, `api/download.ts`
 - Fix: Added Stripe session id validation and 7-day server-side download window enforcement.
 
-### F-006: Public Supabase PDF bucket remains a product-leak risk
+### F-006: Public Supabase PDF bucket remains a product-leak risk until cloud migration
 
 - Severity: High
 - Component: Supabase Storage `pdfs`
 - Risk: If object names are guessed, crawled, or leaked, PDFs can be downloaded outside checkout controls.
 - Cause: Repo and audit blueprint indicate `pdfs` is public; API currently proxies public object URLs.
 - Affected path: `api/download.ts`; cloud config requires Supabase dashboard export.
-- Fix: Code now validates filenames more strictly. Full closure requires making `pdfs` private and replacing public object fetches with service-side signed/private reads.
+- Fix: Code now requires `SUPABASE_URL`, defaults to authenticated private-bucket reads using `SUPABASE_SERVICE_ROLE_KEY` or `SUPABASE_SECRET_KEY`, supports `SUPABASE_PDF_BUCKET`, validates filenames strictly, and only permits public-bucket fallback when `SUPABASE_ALLOW_PUBLIC_PDF_FALLBACK=true` is explicitly set for migration. Full closure still requires making `pdfs` private in Supabase.
 
 ### F-007: Firebase Storage rules too broad
 
@@ -151,7 +151,7 @@ No active production exploitation, load testing, destructive testing, or cloud m
 | F-003 | Wildcard CORS | Medium | CWE-942 / A05 | `vercel.json`, `api/*` | Any Origin could read public API responses. | Explicit allowed origins with `Vary: Origin`. | Low | Amplifies public endpoint issues. |
 | F-004 | Email in download response | Medium | CWE-359 / A01 | `api/download-links.ts` | Buyer email returned to any session-id holder. | Remove email from response. | Low | PII exposure. |
 | F-005 | No download expiry enforcement | Medium | CWE-613 / A01 | `api/download*.ts` | Download links advertised expiry without server check. | Enforce max session age. | Low | Persistent product access after link leak. |
-| F-006 | Public Supabase PDF bucket | High | CWE-284 / A01 | Supabase `pdfs`, `api/download.ts` | PDFs can be directly fetched if object names leak. | Private bucket + server-side signed/private access. | Medium | Product leakage and revenue loss. |
+| F-006 | Public Supabase PDF bucket | High | CWE-284 / A01 | Supabase `pdfs`, `api/download.ts` | PDFs can be directly fetched if object names leak while bucket remains public. | Private bucket + server-only authenticated reads. | Medium | Product leakage and revenue loss. |
 | F-007 | Broad Firebase Storage rules | High | CWE-732 / A01 | `storage.rules` | Global public read and broad signed-in writes. | Default deny with scoped public/admin/owner rules. | Low | Data/object leakage and unwanted uploads. |
 | F-008 | AI history role injection | Medium | CWE-20 / A03 | `api/ai-agent.ts` | Client history passed to model without role filtering. | Allow only `user`/`assistant`, cap content length. | Low | Prompt-boundary weakening. |
 | F-009 | Raw error responses | Low | CWE-209 / A05 | `api/create-checkout-session.ts`, admin routes | Some exceptions returned to clients. | Generic client errors, detailed server logs only. | Low | Recon and support confusion. |
@@ -175,7 +175,7 @@ Quick wins under 1 hour:
 
 Under 1 day:
 
-- Move Supabase `pdfs` to private storage and update `/api/download` to use authenticated storage reads.
+- Move Supabase `pdfs` to private storage, set `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `SUPABASE_PDF_BUCKET`, and keep `SUPABASE_ALLOW_PUBLIC_PDF_FALLBACK` unset/false.
 - Add Vercel Firewall or durable KV-based rate limits for AI, checkout, downloads, and admin routes.
 - Add Dependabot, CODEOWNERS, branch protection, and required PR review on `main`.
 - Create a dedicated dependency upgrade PR for the 25 `npm audit --omit=dev` findings.
@@ -198,14 +198,14 @@ Applied in this PR:
 - Updated `api/admin/system-dump.ts` to use `ADMIN_API_KEY` only and avoid exposing `contentUrl` schema hints.
 - Updated `api/ai-agent.ts` to reject oversized requests and strip client-supplied roles except `user`/`assistant`.
 - Updated `api/create-checkout-session.ts` to validate body shape and avoid raw error responses.
-- Updated `api/download-links.ts` and `api/download.ts` to validate session ids, enforce a 7-day window, validate filenames, and remove buyer email from responses.
+- Updated `api/download-links.ts` and `api/download.ts` to validate session ids, enforce a 7-day window, validate filenames, remove buyer email from responses, and default PDF delivery to server-only authenticated Supabase private-bucket reads.
 - Updated `vercel.json` with CSP, frame protection, content-type sniffing protection, referrer policy, and permissions policy; removed wildcard CORS.
 - Updated `storage.rules` to default deny and scope Firebase Storage access.
 - Updated `.env.example`, `README.md`, `server.ts`, and the Admin UI to stop referencing `VITE_ADMIN_API_KEY`.
 
 Still required outside this repo:
 
-- Supabase Dashboard: make `pdfs` private, export bucket policies, and verify no public object URL can fetch a paid PDF.
+- Supabase Dashboard: make `pdfs` private, set `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `SUPABASE_PDF_BUCKET` in Vercel, export bucket policies, and verify no public object URL can fetch a paid PDF.
 - Vercel Dashboard: verify env scoping, deployment protection for previews, and firewall/rate-limit rules.
 - Firebase Console: deploy and test `firestore.rules` and `storage.rules`; verify admin-role paths.
 - Stripe Dashboard: verify webhook URL, event list, signing secret, Radar settings, and test/live mode separation.
@@ -220,7 +220,7 @@ Local/static:
 - `npm run build` - passed after this patch; Vite emitted only a large-chunk warning.
 - `npm audit --omit=dev` - failed because advisories remain: 25 total, 7 high.
 - Secret scan - no real server secrets found outside placeholders/public Firebase config:
-  - `rg -n "sk_live|sk_test|whsec_|sb_secret|service_role|sk-or-v1|re_[A-Za-z0-9]|FIREBASE_SERVICE_ACCOUNT|private_key" .`
+  - `rg -n "sk_(live|test)_[A-Za-z0-9]{16,}|whsec_[A-Za-z0-9]{16,}|sb_secret_[A-Za-z0-9_-]{16,}|sk-or-v1-[A-Za-z0-9]{16,}|re_[A-Za-z0-9]{16,}|\"private_key\"\\s*:\\s*\"-----BEGIN" -S --glob "!node_modules/**" --glob "!package-lock.json" --glob "!.env.example"`
   - After build: same scan against `dist/`.
 
 Passive production after deploy:
@@ -234,6 +234,8 @@ Passive production after deploy:
   - Expect `401` without Firebase admin bearer token.
 - `curl -i https://www.nolea.shop/api/admin/system-dump`
   - Expect `401` without `Authorization: Bearer $ADMIN_API_KEY`.
+- `curl -i "https://<project>.supabase.co/storage/v1/object/public/pdfs/<known-file>.pdf"`
+  - Expect `400`, `401`, `403`, or `404` after the `pdfs` bucket is private; it must not return the PDF.
 
 Local/mock scenarios:
 
