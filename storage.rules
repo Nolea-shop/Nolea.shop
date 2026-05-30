@@ -22,7 +22,8 @@ service firebase.storage {
     }
 
     match /users/{userId}/{allPaths=**} {
-      allow read, write: if isOwner(userId)
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId)
         && request.resource.size < 10 * 1024 * 1024;
     }
 

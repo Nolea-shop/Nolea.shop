@@ -11,6 +11,25 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function isValidEmail(value: unknown): value is string {
+  return typeof value === 'string' && value.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function isAuthorizedLocalAdminRequest(req: express.Request) {
+  if (process.env.NODE_ENV !== 'production') return true;
+  const adminKey = process.env.ADMIN_API_KEY;
+  return !!adminKey && req.headers.authorization === `Bearer ${adminKey}`;
+}
+
 // Initialize Resend
 let resendInstance: Resend | null = null;
 function getResend() {
@@ -65,7 +84,7 @@ app.get('/api/admin/system-dump', (req, res) => {
     version: "1.2.0",
     features: ["pdf_delivery", "stripe_payments", "resend_emails"],
     schemas: {
-      recipe: ["id", "title", "description", "price", "imageUrl", "category", "contentUrl"],
+      recipe: ["id", "title", "description", "price", "imageUrl", "category"],
       order: ["id", "userId", "total", "status", "items", "createdAt"]
     },
     integrations: {
@@ -78,11 +97,18 @@ app.get('/api/admin/system-dump', (req, res) => {
 
 // Config check for the UI
 app.get('/api/admin/config-status', (req, res) => {
+  if (!isAuthorizedLocalAdminRequest(req)) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   res.json({
-    stripe: !!process.env.STRIPE_SECRET_KEY,
-    resend: !!process.env.RESEND_API_KEY,
-    webhook: !!process.env.STRIPE_WEBHOOK_SECRET,
-    adminKey: !!process.env.ADMIN_API_KEY
+    services: {
+      stripe: !!process.env.STRIPE_SECRET_KEY,
+      resend: !!process.env.RESEND_API_KEY,
+      webhook: !!process.env.STRIPE_WEBHOOK_SECRET,
+      systemDump: !!process.env.ADMIN_API_KEY,
+    },
+    checkedAt: new Date().toISOString(),
   });
 });
 
@@ -96,13 +122,21 @@ app.post('/api/admin/simulate-order', async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized simulation' });
   }
 
+  const safeRecipeTitles = typeof recipeTitles === 'string' ? recipeTitles.trim().slice(0, 500) : '';
+  if (!safeRecipeTitles) {
+    return res.status(400).json({ error: 'Recipe title is required' });
+  }
+
+  if (!isValidEmail(customerEmail)) {
+    return res.status(400).json({ error: 'Valid email is required' });
+  }
+
   const resend = getResend();
-  console.log('--- Order Simulation Started ---');
-  console.log('Target Email:', customerEmail);
-  console.log('Recipes:', recipeTitles);
+  console.log('Order simulation started');
 
   if (resend && customerEmail) {
     try {
+      const escapedTitles = escapeHtml(safeRecipeTitles);
       await resend.emails.send({
         from: 'Nolea Test <noreply@nolea.shop>',
         to: customerEmail,
@@ -112,7 +146,7 @@ app.post('/api/admin/simulate-order', async (req, res) => {
             <div style="background: #8A9A5B; color: white; padding: 5px 15px; border-radius: 5px; display: inline-block; font-family: sans-serif; font-size: 10px; font-weight: bold; margin-bottom: 20px;">SIMULATION MODE</div>
             <h1 style="font-style: italic;">Test-Zustellung erfolgreich!</h1>
             <p>Dies ist eine Simulation des automatisierten Email-Versands.</p>
-            <p><strong>Gekaufte Test-Produkte:</strong> ${recipeTitles}</p>
+            <p><strong>Gekaufte Test-Produkte:</strong> ${escapedTitles}</p>
             <div style="text-align: center; margin: 40px 0;">
               <a href="${APP_URL}/success" style="background-color: #2D2A26; color: white; padding: 15px 30px; text-decoration: none; border-radius: 30px; font-weight: bold; font-family: sans-serif; text-transform: uppercase; font-size: 12px; letter-spacing: 2px;">Zum Test-Download Bereich</a>
             </div>
@@ -122,7 +156,8 @@ app.post('/api/admin/simulate-order', async (req, res) => {
       });
       return res.json({ success: true, message: 'Simulation email sent' });
     } catch (error: any) {
-      return res.status(500).json({ error: error.message });
+      console.error('Simulation error:', error?.message || error);
+      return res.status(500).json({ error: 'Simulation failed' });
     }
   }
 
