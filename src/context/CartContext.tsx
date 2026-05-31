@@ -34,6 +34,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           value: (recipe.price || 0) / 100,
           order_quantity: 1,
           currency: 'EUR',
+          line_items: [{
+            product_name: recipe.title,
+            product_id: recipe.id,
+            product_category: recipe.category || 'Digital Guide',
+            product_price: (recipe.price || 0) / 100,
+            product_quantity: 1,
+            product_brand: 'Nolea',
+          }],
         });
       }
 

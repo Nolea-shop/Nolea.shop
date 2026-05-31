@@ -44,7 +44,18 @@ export function ProductDetail() {
         if (typeof window !== 'undefined' && (window as any).pintrk) {
           (window as any).pintrk('track', 'pagevisit', {
             event_id: found.id,
+            value: (found.price || 0) / 100,
+            order_quantity: 1,
+            currency: 'EUR',
             property: found.category,
+            line_items: [{
+              product_name: found.title,
+              product_id: found.id,
+              product_category: found.category || 'Digital Guide',
+              product_price: (found.price || 0) / 100,
+              product_quantity: 1,
+              product_brand: 'Nolea',
+            }],
           });
         }
 

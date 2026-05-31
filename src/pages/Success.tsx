@@ -37,11 +37,21 @@ export function Success() {
 
             // Pinterest: Track Checkout conversion
             if (typeof window !== 'undefined' && (window as any).pintrk) {
+              const totalValue = links.reduce((sum: number) => sum + 4.99, 0);
               (window as any).pintrk('track', 'checkout', {
                 event_id: sessionId,
-                value: links.length * 4.99,
+                value: totalValue,
                 order_quantity: links.length,
                 currency: 'EUR',
+                order_id: sessionId,
+                line_items: links.map((l: any) => ({
+                  product_name: l.title,
+                  product_id: l.title.toLowerCase().replace(/\s+/g, '-'),
+                  product_category: 'Digital Guide',
+                  product_price: 4.99,
+                  product_quantity: 1,
+                  product_brand: 'Nolea',
+                })),
               });
             }
           }
