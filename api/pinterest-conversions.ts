@@ -1,41 +1,24 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
+import { createHash } from 'crypto';
 
 /**
  * Pinterest Conversions API — Server-Side Event Tracking
  * 
- * Sends events to Pinterest from the server (more reliable than browser pixel).
- * Browser pixel stays as fallback, this endpoint adds server-side tracking.
+ * Full Pinterest API v5 spec:
+ * - event_name: add_to_cart, checkout, page_visit (underscore!)
+ * - action_source: 'web'
+ * - user_data: client_ip_address, client_user_agent required
+ * - custom_data: contents array with item_price + quantity
+ * - event_id for deduplication with browser pixel
  * 
  * POST /api/pinterest-conversions
- * Body: { event: 'checkout'|'addtocart'|'pagevisit', data: {...} }
  */
 
 const PINTEREST_API_URL = 'https://api.pinterest.com/v5/ad_accounts/549770436900/events';
+const AD_ACCOUNT_ID = '549770436900';
 
-interface PinterestEvent {
-  event_name: string;
-  event_time: number;
-  event_id?: string;
-  user_data?: {
-    em?: string;
-    hashed_email?: string;
-  };
-  custom_data?: {
-    value?: number;
-    order_quantity?: number;
-    currency?: string;
-    order_id?: string;
-    line_items?: Array<{
-      product_name: string;
-      product_id: string;
-      product_category: string;
-      product_price: number;
-      product_quantity: number;
-      product_brand: string;
-    }>;
-    search_query?: string;
-    property?: string;
-  };
+function sha256(str: string): string {
+  return createHash('sha256').update(str.toLowerCase().trim()).digest('hex');
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -44,13 +27,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const accessToken = process.env.PINTEREST_ACCESS_TOKEN;
   if (!accessToken) {
@@ -58,34 +36,84 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: 'Pinterest API not configured' });
   }
 
-  const { event, data } = req.body;
+  const { event, data, user_email, event_source_url } = req.body;
 
   if (!event || typeof event !== 'string') {
     return res.status(400).json({ error: 'Event name is required' });
   }
 
-  // Build Pinterest event
-  const pinterestEvent: PinterestEvent = {
-    event_name: event,
-    event_time: Math.floor(Date.now() / 1000),
+  // Map event names to Pinterest API format (underscore)
+  const eventMap: Record<string, string> = {
+    'checkout': 'checkout',
+    'addtocart': 'add_to_cart',
+    'add_to_cart': 'add_to_cart',
+    'pagevisit': 'page_visit',
+    'page_visit': 'page_visit',
+    'search': 'search',
+    'signup': 'signup',
+    'lead': 'lead',
+    'viewcategory': 'view_category',
+    'view_category': 'view_category',
   };
 
-  // Add event_id if provided
+  const eventName = eventMap[event] || event;
+
+  // Build user_data (required)
+  const userData: any = {
+    client_ip_address: req.headers['x-forwarded-for'] as string || req.socket.remoteAddress || '0.0.0.0',
+    client_user_agent: req.headers['user-agent'] || '',
+  };
+
+  // Add hashed email if provided (for better matching)
+  if (user_email) {
+    userData.em = [sha256(user_email)];
+  }
+
+  // Build custom_data
+  const customData: any = {};
+  if (data) {
+    if (data.value !== undefined) customData.value = String(data.value);
+    if (data.currency) customData.currency = data.currency;
+    if (data.order_id) customData.order_id = data.order_id;
+    if (data.search_query) customData.search_string = data.search_query;
+    if (data.property) customData.content_category = data.property;
+
+    // Contents array (Pinterest format)
+    if (data.line_items && Array.isArray(data.line_items)) {
+      customData.contents = data.line_items.map((item: any) => ({
+        item_price: String(item.product_price || 0),
+        quantity: item.product_quantity || 1,
+      }));
+      customData.content_ids = data.line_items.map((item: any) => item.product_id);
+      customData.num_items = data.line_items.length;
+      if (data.line_items[0]) {
+        customData.content_name = data.line_items[0].product_name;
+        customData.content_brand = data.line_items[0].product_brand || 'Nolea';
+      }
+    }
+  }
+
+  // Build Pinterest event
+  const pinterestEvent: any = {
+    event_name: eventName,
+    action_source: 'web',
+    event_time: Math.floor(Date.now() / 1000),
+    user_data: userData,
+  };
+
+  // event_id for deduplication (same as browser pixel)
   if (data?.event_id) {
     pinterestEvent.event_id = data.event_id;
   }
 
-  // Add custom_data
-  if (data) {
-    pinterestEvent.custom_data = {};
-    
-    if (data.value !== undefined) pinterestEvent.custom_data.value = data.value;
-    if (data.order_quantity !== undefined) pinterestEvent.custom_data.order_quantity = data.order_quantity;
-    if (data.currency) pinterestEvent.custom_data.currency = data.currency;
-    if (data.order_id) pinterestEvent.custom_data.order_id = data.order_id;
-    if (data.search_query) pinterestEvent.custom_data.search_query = data.search_query;
-    if (data.property) pinterestEvent.custom_data.property = data.property;
-    if (data.line_items) pinterestEvent.custom_data.line_items = data.line_items;
+  // event_source_url
+  if (event_source_url) {
+    pinterestEvent.event_source_url = event_source_url;
+  }
+
+  // custom_data
+  if (Object.keys(customData).length > 0) {
+    pinterestEvent.custom_data = customData;
   }
 
   // Send to Pinterest Conversions API
@@ -97,14 +125,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        events: [pinterestEvent],
+        data: [pinterestEvent],
       }),
     });
 
     const result = await response.json();
 
     if (!response.ok) {
-      console.error('Pinterest API error:', result);
+      console.error('Pinterest API error:', response.status, result);
       return res.status(response.status).json({ error: 'Pinterest API error', details: result });
     }
 
