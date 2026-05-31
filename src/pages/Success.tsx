@@ -34,6 +34,16 @@ export function Success() {
             setDownloadLinks(links);
             setLoading(false);
             clearInterval(interval);
+
+            // Pinterest: Track Checkout conversion
+            if (typeof window !== 'undefined' && (window as any).pintrk) {
+              (window as any).pintrk('track', 'checkout', {
+                event_id: sessionId,
+                value: links.length * 4.99,
+                order_quantity: links.length,
+                currency: 'EUR',
+              });
+            }
           }
         }
       } catch (e) {

@@ -39,6 +39,15 @@ export function ProductDetail() {
       const found = recipes.find((r) => r.id === id);
       if (found) {
         setRecipe(found);
+
+        // Pinterest: Track PageVisit
+        if (typeof window !== 'undefined' && (window as any).pintrk) {
+          (window as any).pintrk('track', 'pagevisit', {
+            event_id: found.id,
+            property: found.category,
+          });
+        }
+
         // Get related products (same category, excluding current)
         const relatedProducts = recipes
           .filter(

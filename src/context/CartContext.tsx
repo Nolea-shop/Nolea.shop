@@ -26,6 +26,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setCart(prev => {
       const existing = prev.find(item => item.id === recipe.id);
       if (existing) return prev; // Recipes are usually single purchase
+
+      // Pinterest: Track AddToCart
+      if (typeof window !== 'undefined' && (window as any).pintrk) {
+        (window as any).pintrk('track', 'addtocart', {
+          event_id: recipe.id,
+          value: (recipe.price || 0) / 100,
+          order_quantity: 1,
+          currency: 'EUR',
+        });
+      }
+
       return [...prev, { ...recipe, quantity: 1 }];
     });
   };
